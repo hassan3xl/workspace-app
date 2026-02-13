@@ -28,7 +28,7 @@ export function CommunityNavbar({}) {
                 src="/favicon.png"
                 width={25}
                 height={25}
-                alt="FlowStack Logo"
+                alt="Workn Logo"
               />
             </Link>
           </div>

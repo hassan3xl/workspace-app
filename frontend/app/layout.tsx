@@ -9,7 +9,7 @@ import { SidebarProvider } from "@/contexts/SidebarContext";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "FlowStack",
+  title: "Workn",
   description:
     "a collaborative project management platform where teams plan, assign, and complete tasks in real time. Organize projects, manage permissions, and keep your workflow in sync — all in one sleek, dark interface.",
   manifest: "/manifest.json",

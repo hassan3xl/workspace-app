@@ -51,7 +51,7 @@ export function Navbar() {
                 src="/logo.png"
                 width={150}
                 height={5}
-                alt="FlowStack Logo"
+                alt="Workn Logo"
                 className="w-32 sm:w-[150px] h-auto"
               />
             </Link>
