@@ -1,8 +1,7 @@
 
 from pathlib import Path
 
-# BASE_DIR = Path(__file__).resolve().parent.parent # old - 2 level top
-BASE_DIR = Path(__file__).resolve().parent.parent.parent # new - 3 level top
+BASE_DIR = Path(__file__).resolve().parent.parent 
 
 import os
 from dotenv import load_dotenv
@@ -39,9 +38,8 @@ INSTALLED_APPS = [
 
     # Third Party
     'rest_framework',
-    'rest_framework.authtoken', # Required by dj-rest-auth
+    'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    # 'rest_framework_simplejwt.token_blacklist', # For logout to work properly
     
     'dj_rest_auth',
     'dj_rest_auth.registration',
@@ -49,7 +47,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google', # Google Provider
+    'allauth.socialaccount.providers.google',
 
     # 'debug_toolbar', # Only load Debug Toolbar if we are NOT testing
     
