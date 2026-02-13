@@ -17,15 +17,21 @@ ALLOWED_HOSTS = os.environ.get(
 DATABASES = {
 
     # db from docker for development
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydb',              # Matches POSTGRES_DB in compose
-        'USER': 'myuser',            # Matches POSTGRES_USER
-        'PASSWORD': 'mypassword',    # Matches POSTGRES_PASSWORD
-        'HOST': 'db',                # The service name in docker-compose
-        'PORT': 5432,
-    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'mydb',              # Matches POSTGRES_DB in compose
+    #     'USER': 'myuser',            # Matches POSTGRES_USER
+    #     'PASSWORD': 'mypassword',    # Matches POSTGRES_PASSWORD
+    #     'HOST': 'db',                # The service name in docker-compose
+    #     'PORT': 5432,
+    # },
     # "default": dj_database_url.config(default=os.getenv("NEON_DB"))
+
+    # use default sqlite for development to avoid needing a db setup
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 STORAGES = {

@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     # local apps
     "users",
     "workspace",
-    "community",
     'notifications',
     'router',
 

@@ -173,11 +173,6 @@ export default function LandingPage() {
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-8">
-              <Zap className="w-4 h-4" />
-              <span>Powerful Team Collaboration Platform</span>
-            </div>
-
             <h1 className="text-2xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
               Where Teams
               <span className="text-primary"> Connect</span>,
