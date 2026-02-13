@@ -17,7 +17,7 @@ class TestView(APIView):
     
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('apps.router.urls')),
+    path('api/', include('apps.router.urls')),
     # path('test/', TestView.as_view(), name='test'),
 ] 
 

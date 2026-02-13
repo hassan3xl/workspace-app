@@ -31,7 +31,7 @@ export function Sidebar() {
             "fixed inset-y-0 left-0 mt-13 z-50 h-[94vh] flex flex-col bg-background/95 backdrop-blur border-r border-border transition-all duration-300 ease-in-out shadow-2xl md:shadow-none",
             // Width Logic: Mobile (Full) vs Desktop (Slim)
             isOpen ? "w-[280px] translate-x-0" : "w-[280px] -translate-x-full",
-            "md:translate-x-0 md:w-[72px]"
+            "md:translate-x-0 md:w-[72px]",
           )}
         >
           {/* --- TOP SECTION (Navigation) --- */}
@@ -39,7 +39,6 @@ export function Sidebar() {
             <HomeCard />
             <WorkspaceCard />
             {/* <MessageCard /> */}
-            <CommunitiesCard />
 
             <Separator className="h-[2px] w-10 bg-accent rounded-full mx-auto" />
           </div>
