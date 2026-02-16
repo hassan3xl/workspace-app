@@ -7,7 +7,6 @@ import MessageCard from "../messages/MessageCard";
 import UserCard from "./cards/UserCard";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import CommunitiesCard from "./cards/CommunitiesCard";
 import WorkspaceCard from "./cards/WorkspaceCard";
 import SidebarWorkspaceCard from "./cards/SidebarWorkspaceCard";
 

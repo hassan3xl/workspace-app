@@ -34,8 +34,12 @@ export const useGetProfile = () => {
     // CRITICAL: Disable retries for this specific query.
     // If the user isn't logged in, retrying 3 times won't magically log them in.
     retry: false,
-    // Optional: Prevent refetching when window gains focus if user is missing
+    // Keep profile data fresh for 5 minutes to avoid excessive API calls
+    staleTime: 5 * 60 * 1000,
+    // Only refetch when explicitly invalidated (login, profile update, etc.)
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 };
 

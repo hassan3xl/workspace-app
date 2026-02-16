@@ -21,7 +21,7 @@ export default function HomeCard() {
     <button
       onClick={() => {
         closeSidebar();
-        router.push(`/home`);
+        router.push(`/`);
       }}
       className={cn(
         "group relative flex items-center gap-4 w-full md:justify-center p-2 md:p-0 transition-all",
@@ -32,7 +32,7 @@ export default function HomeCard() {
           ? "md:bg-primary md:text-primary-foreground bg-accent"
           : "md:bg-background md:hover:bg-accent md:text-foreground",
         // Mobile: Standard list item
-        "rounded-lg"
+        "rounded-lg",
       )}
     >
       {/* Icon */}

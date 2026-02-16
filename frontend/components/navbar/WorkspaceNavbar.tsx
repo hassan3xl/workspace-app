@@ -27,7 +27,7 @@ export function WorkspaceNavbar({ workspace }: WorkspaceNavbarProps) {
             >
               <MenuIcon />
             </Button>
-            <Link href="/home" className="rounded-md md:ml-22 p-2">
+            <Link href="/" className="rounded-md md:ml-22 p-2">
               <Image
                 src="/favicon.png"
                 width={25}

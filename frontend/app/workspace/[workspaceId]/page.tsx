@@ -8,24 +8,18 @@ import {
   TrendingUp,
   CheckCircle2,
   ArrowRight,
-  Plus,
   LayoutDashboard,
-  Settings,
   UserPlus,
   ClipboardList,
   Clock,
-  MoreHorizontal,
-  Sparkles,
 } from "lucide-react";
 
-// Components
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import CommunityHomeMemberCard from "@/components/workspace/WorkspaceHomeMemberCard";
+import WorkspaceHomeMemberCard from "@/components/workspace/WorkspaceHomeMemberCard";
 import Loader from "@/components/Loader";
 
-// Hooks & Context
 import { formatDate, timeAgo } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetWorkspaceDashboard } from "@/lib/hooks/workspace.hook";
@@ -33,36 +27,28 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { ProjectType } from "@/lib/types/project.types";
 import AddProjectModal from "@/components/workspace/projects/AddProjectModal";
 import { AvatarFallback, AvatarImage, Avatar } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 const WorkspaceDetails = () => {
-  const { user } = useAuth();
-  const { workspaceId, userRole, isAdminOrOwner } = useWorkspace();
+  const { workspaceId, isAdminOrOwner } = useWorkspace();
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
 
   const { data: dashboard, isLoading: dashboardLoading } =
     useGetWorkspaceDashboard(workspaceId);
-  console.log("dashboard", dashboard);
 
-  // if (dashboard === null || dashboard === undefined) {
-  //   return;
-  // }
   if (dashboardLoading) return <Loader variant="ring" />;
-
+  const router = useRouter();
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* --- HERO SECTION --- */}
       <WorkspaceHeader dashboard={dashboard} />
 
-      {/* --- MAIN GRID LAYOUT --- */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {/* LEFT COLUMN: Main Dashboard (8 cols) */}
-
         <div className="xl:col-span-8 space-y-8">
-          {/* 1. Quick Actions Grid */}
-          {isAdminOrOwner && (
+          {/* {isAdminOrOwner && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <>
                 <QuickActionCard
+                  onClick={() => setIsAddProjectModalOpen(true)}
                   title="New Project"
                   desc="Start a new initiative"
                   icon={Folder}
@@ -85,60 +71,61 @@ const WorkspaceDetails = () => {
                 />
               </>
             </div>
-          )}
+          )} */}
 
-          {/* 2. My Priorities (Replacing Feed) */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                My Priorities
-              </h2>
-              <Button
-                variant="link"
-                size="sm"
-                className="text-muted-foreground"
-              >
-                View all tasks
-              </Button>
-            </div>
-
-            {/* user priorities */}
-            <div className="bg-card border border-border rounded-xl shadow-sm divide-y divide-border">
-              {dashboard?.my_tasks?.slice(0, 5).map((task: any) => (
-                <div
-                  key={task.id}
-                  className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group cursor-pointer"
+          {/* user priorities */}
+          {dashboard?.my_tasks > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  My Priorities
+                </h2>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-muted-foreground"
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        task.priority === "high"
-                          ? "bg-red-500"
-                          : task.priority === "medium"
-                          ? "bg-yellow-500"
-                          : "bg-blue-500"
-                      }`}
-                    />
-                    <div>
-                      <p className="font-medium text-sm text-foreground">
-                        {task.title.slice(0, 30) + "..."}
-                      </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-                        <Folder className="w-3 h-3" />{" "}
-                        {task.project_title.slice(0, 20) + "..."}
-                      </p>
+                  View all tasks
+                </Button>
+              </div>
+              <div className="bg-card border border-border rounded-xl shadow-sm divide-y divide-border">
+                {dashboard?.my_tasks?.slice(0, 5).map((task: any) => (
+                  <div
+                    key={task.id}
+                    className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          task.priority === "high"
+                            ? "bg-red-500"
+                            : task.priority === "medium"
+                              ? "bg-yellow-500"
+                              : "bg-blue-500"
+                        }`}
+                      />
+                      <div>
+                        <p className="font-medium text-sm text-foreground">
+                          {task.title.slice(0, 30) + "..."}
+                        </p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+                          <Folder className="w-3 h-3" />{" "}
+                          {task.project_title.slice(0, 20) + "..."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md flex items-center gap-1">
+                        <Clock className="w-3 h-3" />{" "}
+                        {formatDate(task?.due_date)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {formatDate(task?.due_date)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 3. Active */}
           <div className="space-y-4">
@@ -160,6 +147,11 @@ const WorkspaceDetails = () => {
               {dashboard?.active_projects?.map((project: ProjectType) => (
                 <div
                   key={project.id}
+                  onClick={() =>
+                    router.push(
+                      `/workspace/${workspaceId}/projects/${project.id}`,
+                    )
+                  }
                   className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-all cursor-pointer group"
                 >
                   <div className="flex justify-between items-start mb-4">
@@ -284,7 +276,7 @@ const WorkspaceDetails = () => {
             </div>
             <div className="p-4 space-y-4">
               {dashboard.recent_members.slice(0, 3).map((member: any) => (
-                <CommunityHomeMemberCard member={member} key={member.id} />
+                <WorkspaceHomeMemberCard member={member} key={member.id} />
               ))}
             </div>
           </div>

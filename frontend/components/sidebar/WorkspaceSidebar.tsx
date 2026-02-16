@@ -100,7 +100,7 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
           "fixed z-[50] left-0 h-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
           isOpen
             ? "w-[280px] translate-x-0"
-            : "w-[80px] -translate-x-full md:translate-x-0"
+            : "w-[80px] -translate-x-full md:translate-x-0",
         )}
       >
         <div className="flex flex-col h-full">
@@ -135,7 +135,6 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
             >
               {isOpen ? <ChevronLeft size={18} /> : <ArrowRight size={18} />}
             </Button>
-            {isOpen && <ThemeSwitcher />}
           </div>
 
           {/* --- SCROLLABLE CONTENT --- */}
@@ -178,7 +177,7 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
                               ? "bg-primary/10 text-primary"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground",
                             // Collapsed centering
-                            !isOpen && "justify-center px-0 py-3"
+                            !isOpen && "justify-center px-0 py-3",
                           )}
                         >
                           {/* Active Indicator Line (Left) */}
@@ -190,7 +189,7 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
                           <span
                             className={cn(
                               "transition-transform group-hover:scale-105",
-                              isActive && "text-primary"
+                              isActive && "text-primary",
                             )}
                           >
                             {item.icon}
@@ -202,7 +201,7 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
                               "ml-3 truncate transition-all duration-300 origin-left",
                               isOpen
                                 ? "w-auto opacity-100"
-                                : "w-0 opacity-0 hidden"
+                                : "w-0 opacity-0 hidden",
                             )}
                           >
                             {item.label}
