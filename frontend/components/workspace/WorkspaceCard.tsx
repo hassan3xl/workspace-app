@@ -32,14 +32,6 @@ const WorkspaceCard = ({ workspace }: { workspace: any }) => {
             <h3 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
               {workspace.name}
             </h3>
-            {isOwner && (
-              <Badge
-                variant="secondary"
-                className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none px-1.5 py-0 h-5 text-[10px]"
-              >
-                <Crown className="w-3 h-3 mr-1" /> PRO
-              </Badge>
-            )}
           </div>
           <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
             {workspace.description || "No description provided"}

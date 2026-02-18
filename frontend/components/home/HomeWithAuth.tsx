@@ -6,13 +6,10 @@ import { Layout, ArrowRight } from "lucide-react";
 import WorkspaceCard from "@/components/workspace/WorkspaceCard";
 import { useGetWorkspaces } from "@/lib/hooks/workspace.hook";
 import Header from "@/components/Header";
-import { useAuth } from "@/contexts/AuthContext";
 
-const HomeWithAuth = ({ user: initialUser }: { user: any }) => {
+const HomeWithAuth = ({ user }: { user: any }) => {
   const { data: workspaces } = useGetWorkspaces();
 
-  const { user: authUser } = useAuth();
-  const user = authUser || initialUser;
   const recentWorkspaces = workspaces?.slice(0, 4);
 
   const userName = user?.username || "User";
