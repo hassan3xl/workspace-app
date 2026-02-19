@@ -11,7 +11,8 @@ from django.db import models
 # from workspace.permissions.workspace_permissions import IsWorkspaceMember
 from workspace.permissions.permissions import (
     IsProjectCollaboratorOrWorkspaceAdmin, 
-    IsTaskCollaboratorOrProjectAdmin
+    IsTaskCollaboratorOrProjectAdmin,
+    IsCommentVisibleToUser
 )
 
 from workspace.models import (
@@ -123,16 +124,24 @@ class TaskListCreateView(generics.ListCreateAPIView):
         # 2. Notifications (Refined)
         # We perform this AFTER save to ensure the task actually exists
         members = project.members.all().select_related('user') # Optimization
-        recipient_users = [m.user for m in members if m.user != user] # Exclude self
+        # recipient_users = [m.user for m in members if m.user != user] # Exclude self
         
-        if recipient_users:
+        # We only want to notify the ASSIGNED user for now, or if we implement @mentions later.
+        # But per user request: "send notification for a user if a task created and they are tagged in"
+        # "Tagged in" usually means assigned.
+        
+        recipients = []
+        if task.assigned_to and task.assigned_to != user:
+            recipients.append(task.assigned_to)
+            
+        if recipients:
             NotificationService.send_bulk_notification(
-                recipients=recipient_users,
+                recipients=recipients,
                 actor=user,
-                title="New Task Added",
-                message=f"New task '{task.title}' added to project '{project.title}'.",
-                target_obj=task, # Point to the task, not the project
-                category='task_added',
+                title="Assigned to New Task",
+                message=f"{user.profile.username} assigned you to a new task: '{task.title}' in '{project.title}'.",
+                target_obj=task, # Point to the task
+                category='task_assigned',
             )
 
 class TaskRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
@@ -319,3 +328,48 @@ class CommentListCreateView(generics.ListCreateAPIView):
             task=task,
             content=serializer.validated_data['content']
         )
+
+
+class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsCommentVisibleToUser
+    ]
+
+    lookup_field = "id"
+    lookup_url_kwarg = "comment_id"
+
+    def get_queryset(self):
+        # Validation of hierarchy
+        workspace_id = self.kwargs.get("workspace_id")
+        project_id = self.kwargs.get("project_id")
+        task_id = self.kwargs.get("task_id")
+        
+        return Comment.objects.filter(
+            task__id=task_id,
+            task__project__id=project_id,
+            task__project__workspace__id=workspace_id
+        )
+
+    def check_object_permissions(self, request, obj):
+        super().check_object_permissions(request, obj)
+        
+        # Specific Logic: 
+        # 1. Author can edit/delete
+        # 2. Admins/Owners can delete (but maybe not edit content?)
+        
+        if request.method in ['PUT', 'PATCH']:
+            if obj.author != request.user:
+                raise PermissionDenied("You can only edit your own comments.")
+        
+        if request.method == 'DELETE':
+            # Check if admin/owner of workspace
+            is_admin = WorkspaceMember.objects.filter(
+                workspace_id=self.kwargs.get("workspace_id"),
+                user=request.user,
+                role__in=['admin', 'owner']
+            ).exists()
+            
+            if obj.author != request.user and not is_admin:
+                raise PermissionDenied("You can only delete your own comments.")

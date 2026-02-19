@@ -165,21 +165,34 @@ def create_comment_service(user, task, content):
             target_text=f"Comment on {task.title}"
         )
 
-        # 3. Notify Relevant People (Assignee + Creator)
+        # 3. Notify Relevant People (Assignee + Creator + Project Members who participated?)
         recipients = set()
-        if task.assigned_to: recipients.add(task.assigned_to)
-        if task.created_by: recipients.add(task.created_by)
         
-        # Don't notify the person who commented
-        if user in recipients: recipients.remove(user)
+        # Add Assignee
+        if task.assigned_to: 
+            recipients.add(task.assigned_to)
+            
+        # Add Creator
+        if task.created_by: 
+            recipients.add(task.created_by)
+            
+        # Optional: Add anyone who has already commented on this task?
+        # previous_commenters = Comment.objects.filter(task=task).values_list('author', flat=True)
+        # recipients.update(User.objects.filter(id__in=previous_commenters))
 
+        # Don't notify the person who just commented
+        if user in recipients: 
+            recipients.remove(user)
+
+        # Iterate and send so we can customize title? Or bulk is fine?
+        # Bulk is fine for now.
         if recipients:
             NotificationService.send_bulk_notification(
                 recipients=list(recipients),
                 actor=user,
-                title="New Comment",
-                message=f"{user.profile.username} commented on {task.title}",
-                target_obj=task,
+                title=f"New Comment on '{task.title}'",
+                message=f"{user.profile.username}: {content[:50]}...", # Truncate content
+                target_obj=task, # Link to the task
                 category='comment_mention'
             )
             

@@ -10,6 +10,7 @@ from ..views.project_views import (
     StartTaskView,
     CompleteTaskView,
     CommentListCreateView,
+    CommentRetrieveUpdateDestroyView,
 )
 
 # ----------------------- ROUTERS -----------------------
@@ -55,9 +56,14 @@ urlpatterns = [
         name="complete-task"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comment/",
+        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/",
         CommentListCreateView.as_view(),
         name="task-comment"
+    ),
+    path(
+        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/<uuid:comment_id>/",
+        CommentRetrieveUpdateDestroyView.as_view(),
+        name="task-comment-detail"
     ),
 
     # Project members

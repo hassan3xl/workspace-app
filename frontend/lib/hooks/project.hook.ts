@@ -80,7 +80,7 @@ export const useDeleteProject = () => {
 
 export const useGetProjectCollaborators = (
   workspaceId: string,
-  projectId: string
+  projectId: string,
 ) => {
   return useQuery({
     queryKey: ["projectCollaborators"],
@@ -236,6 +236,61 @@ export const useCommentTask = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project"] });
       toast.success("Comment added successfully");
+    },
+  });
+};
+
+export const useUpdateComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      workspaceId,
+      projectId,
+      itemId,
+      commentId,
+      commentData,
+    }: {
+      workspaceId: string;
+      projectId: string;
+      itemId: string;
+      commentId: string;
+      commentData: any;
+    }) =>
+      projectApi.updateComment(
+        workspaceId,
+        projectId,
+        itemId,
+        commentId,
+        commentData,
+      ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project"] });
+      toast.success("Comment updated");
+    },
+  });
+};
+
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      workspaceId,
+      projectId,
+      itemId,
+      commentId,
+    }: {
+      workspaceId: string;
+      projectId: string;
+      itemId: string;
+      commentId: string;
+    }) => projectApi.deleteComment(workspaceId, projectId, itemId, commentId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project"] });
+      toast.success("Comment deleted");
     },
   });
 };

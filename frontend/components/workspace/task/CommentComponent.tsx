@@ -20,9 +20,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FormInput } from "@/components/input/formInput";
 import { formatDate } from "@/lib/utils";
-import { useCommentTask } from "@/lib/hooks/project.hook";
+import {
+  useCommentTask,
+  useUpdateComment,
+  useDeleteComment,
+} from "@/lib/hooks/project.hook";
 import { CommentsType } from "@/lib/types/project.types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -127,59 +141,179 @@ const CommentComponent = ({
         )}
 
         {comments.map((comment) => (
-          <div key={comment.id} className="relative group/comment">
-            {/* Avatar Node */}
-            <div className="absolute left-[-42px] sm:left-[-50px] top-0 bg-background rounded-full p-1 border border-border">
-              <Avatar className="w-6 h-6 sm:w-8 sm:h-8">
-                <AvatarImage src={comment.author.avatar || ""} />
-                <AvatarFallback className="text-[10px] sm:text-xs bg-secondary font-bold text-muted-foreground">
-                  {comment.author.username?.[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-
-            {/* Comment Bubble */}
-            <div className="bg-card hover:bg-card/80 border border-border/60 rounded-lg p-4 transition-colors">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm text-foreground">
-                    {comment.author.username}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(comment.created_at)}
-                  </span>
-                </div>
-
-                {/* Dropdown for Actions (Cleaner than visible buttons) */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover/comment:opacity-100 transition-opacity"
-                    >
-                      <MoreHorizontal className="w-3 h-3 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Edit2 className="w-3 h-3 mr-2" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-500 hover:text-red-600 focus:text-red-600">
-                      <Trash2 className="w-3 h-3 mr-2" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                {comment.content}
-              </div>
-            </div>
-          </div>
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            workspaceId={workspaceId}
+            projectId={projectId}
+            taskId={itemId}
+          />
         ))}
       </div>
     </div>
+  );
+};
+
+// Extracted for cleaner state management
+const CommentItem = ({
+  comment,
+  workspaceId,
+  projectId,
+  taskId,
+}: {
+  comment: CommentsType;
+  workspaceId: string;
+  projectId: string;
+  taskId: string;
+}) => {
+  const { user } = useAuth(); // Assume we have user context
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editContent, setEditContent] = React.useState(comment.content);
+
+  const { mutateAsync: updateComment, isPending: isUpdating } =
+    useUpdateComment();
+  const { mutateAsync: deleteComment, isPending: isDeleting } =
+    useDeleteComment();
+
+  // Permissions: Author OR Admin/Owner (we'd need workspace role here strictly,
+  // but for now let's allow author. Backend handles security).
+  const isAuthor = user?.username === comment.author.username; // Or ID check if available
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const handleUpdate = async () => {
+    if (!editContent.trim()) return;
+    try {
+      await updateComment({
+        workspaceId,
+        projectId,
+        itemId: taskId,
+        commentId: comment.id,
+        commentData: { content: editContent },
+      });
+      setIsEditing(false);
+    } catch (e) {
+      // toast handled by hook
+    }
+  };
+
+  const handleDelete = async () => {
+    await deleteComment({
+      workspaceId,
+      projectId,
+      itemId: taskId,
+      commentId: comment.id,
+    });
+    setDeleteDialogOpen(false);
+  };
+
+  return (
+    <>
+      <div className="relative group/comment">
+        {/* Avatar Node */}
+        <div className="absolute left-[-42px] sm:left-[-50px] top-0 bg-background rounded-full p-1 border border-border">
+          <Avatar className="w-6 h-6 sm:w-8 sm:h-8">
+            <AvatarImage src={comment.author.avatar || ""} />
+            <AvatarFallback className="text-[10px] sm:text-xs bg-secondary font-bold text-muted-foreground">
+              {comment.author.username?.[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Comment Bubble */}
+        <div className="bg-card hover:bg-card/80 border border-border/60 rounded-lg p-4 transition-colors">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-sm text-foreground">
+                {comment.author.username}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {formatDate(comment.created_at)}
+              </span>
+              {comment.updated_at !== comment.created_at && (
+                <span className="text-[10px] text-muted-foreground italic">
+                  (edited)
+                </span>
+              )}
+            </div>
+
+            {/* Dropdown for Actions */}
+            {/* Show if Author (or based on role if we passed it down) */}
+            {isAuthor && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover/comment:opacity-100 transition-opacity"
+                  >
+                    <MoreHorizontal className="w-3 h-3 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Edit2 className="w-3 h-3 mr-2" /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="text-red-500 hover:text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="w-3 h-3 mr-2" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+
+          {isEditing ? (
+            <div className="space-y-2">
+              <textarea
+                className="w-full bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={3}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleUpdate} disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+              {comment.content}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

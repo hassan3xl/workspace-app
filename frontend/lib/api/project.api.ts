@@ -10,7 +10,7 @@ export const projectApi = {
 
   getProject: async (workspaceId: string, projectId: string) => {
     const res = await apiService.get(
-      `/workspaces/${workspaceId}/projects/${projectId}/`
+      `/workspaces/${workspaceId}/projects/${projectId}/`,
     );
     return res;
   },
@@ -18,25 +18,25 @@ export const projectApi = {
   addProject: async (projectData: any, workspaceId: string) => {
     const res = await apiService.post(
       `/workspaces/${workspaceId}/projects/`,
-      projectData
+      projectData,
     );
     return res;
   },
   updateProject: async (
     projectData: any,
     workspaceId: string,
-    projectId: string
+    projectId: string,
   ) => {
     const res = await apiService.patch(
       `/workspaces/${workspaceId}/projects/${projectId}/`,
-      projectData
+      projectData,
     );
     return res;
   },
 
   deleteProject: async (workspaceId: string, projectId: string) => {
     const res = await apiService.delete(
-      `/workspaces/${workspaceId}/projects/${projectId}/`
+      `/workspaces/${workspaceId}/projects/${projectId}/`,
     );
     return res;
   },
@@ -44,29 +44,29 @@ export const projectApi = {
   addProjectMember: async (
     collabData: any,
     workspaceId: string,
-    projectId: string
+    projectId: string,
   ) => {
     const res = await apiService.post(
       `/workspaces/${workspaceId}/projects/${projectId}/collaborators/`,
-      collabData
+      collabData,
     );
     return res;
   },
 
   getProjectMembers: async (workspaceId: string, projectId: string) => {
     const res = await apiService.get(
-      `/workspaces/${workspaceId}/projects/${projectId}/collaborators/`
+      `/workspaces/${workspaceId}/projects/${projectId}/collaborators/`,
     );
     return res;
   },
   removeProjectMember: async (
     collabData: any,
     workspaceId: string,
-    projectId: string
+    projectId: string,
   ) => {
     const res = await apiService.post(
       `/workspaces/${workspaceId}/projects/${projectId}/collaborators/`,
-      collabData
+      collabData,
     );
     return res;
   },
@@ -75,7 +75,7 @@ export const projectApi = {
   addTask: async (projectData: any, workspaceId: string, projectId: string) => {
     const res = await apiService.post(
       `/workspaces/${workspaceId}/projects/${projectId}/tasks/`,
-      projectData
+      projectData,
     );
     return res;
   },
@@ -84,23 +84,23 @@ export const projectApi = {
     projectData: any,
     workspaceId: string,
     projectId: string,
-    itemId: string
+    itemId: string,
   ) => {
     const res = await apiService.patch(
       `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/`,
-      projectData
+      projectData,
     );
     return res;
   },
 
   deleteTask: async (workspaceId: string, projectId: string, itemId: string) =>
     apiService.delete(
-      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/`
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/`,
     ),
 
   startTask: async (workspaceId: string, projectId: string, itemId: string) => {
     const res = await apiService.post(
-      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/start/`
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/start/`,
     );
     return res;
   },
@@ -108,10 +108,10 @@ export const projectApi = {
   completeTask: async (
     workspaceId: string,
     projectId: string,
-    itemId: string
+    itemId: string,
   ) => {
     const res = await apiService.post(
-      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/complete/`
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/complete/`,
     );
     return res;
   },
@@ -120,11 +120,37 @@ export const projectApi = {
     workspaceId: string,
     projectId: string,
     itemId: string,
-    commentData: any
+    commentData: any,
   ) => {
     const res = await apiService.post(
-      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/comment/`,
-      commentData
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/comments/`,
+      commentData,
+    );
+    return res;
+  },
+
+  updateComment: async (
+    workspaceId: string,
+    projectId: string,
+    itemId: string,
+    commentId: string,
+    commentData: any,
+  ) => {
+    const res = await apiService.patch(
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/comments/${commentId}/`,
+      commentData,
+    );
+    return res;
+  },
+
+  deleteComment: async (
+    workspaceId: string,
+    projectId: string,
+    itemId: string,
+    commentId: string,
+  ) => {
+    const res = await apiService.delete(
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${itemId}/comments/${commentId}/`,
     );
     return res;
   },
