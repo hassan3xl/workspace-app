@@ -49,7 +49,19 @@ export default function RootLayout({
             <AuthProvider>
               <ServiceWorkerRegistration />
               <SidebarProvider>
-                <Toaster richColors position="top-right" />
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    classNames: {
+                      error: "text-red-600 border border-border bg-background",
+                      success:
+                        "text-green-600 border border-border bg-background",
+                      warning:
+                        "text-yellow-600 border border-border bg-background",
+                      info: "text-blue-600 border border-border bg-background",
+                    },
+                  }}
+                />
                 <>
                   {children}
                   {modal}

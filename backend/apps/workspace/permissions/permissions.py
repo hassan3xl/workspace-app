@@ -173,3 +173,37 @@ class IsTaskCollaboratorOrProjectAdmin(permissions.BasePermission):
         # Check if the project member specifically has 'write' permission.
         # NOTE: Adjust 'permission' to whatever field name you use (e.g., 'role', 'access_level')
         return project_member.permission == 'write'
+
+
+class IsCommentVisibleToUser(permissions.BasePermission):
+    """
+    Handles permissions for Comment interactions.
+    """
+    def has_permission(self, request, view):
+         return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        # obj is Comment
+        task = obj.task
+        project = task.project
+        workspace = project.workspace
+
+        # 1. Workspace Admin/Owner Override
+        workspace_member = WorkspaceMember.objects.filter(
+            workspace=workspace,
+            user=request.user
+        ).first()
+
+        if workspace_member and workspace_member.role in ['admin', 'owner']:
+            return True
+
+        # 2. Project Member Check
+        is_project_member = ProjectMember.objects.filter(
+            project=project,
+            user=request.user
+        ).exists()
+        
+        if not is_project_member:
+            return False
+
+        return True

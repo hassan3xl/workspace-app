@@ -11,6 +11,7 @@ export type CommentsType = {
   content: string;
   author: UserType;
   created_at: string;
+  updated_at?: string;
   created_by: string;
 };
 
