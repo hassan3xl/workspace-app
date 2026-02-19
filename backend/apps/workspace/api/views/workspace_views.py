@@ -32,6 +32,14 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from notifications.notification_services import NotificationService
 
+# Caching
+from workspace.cache_utils import (
+    cache_get, cache_set, cache_delete,
+    workspace_list_key, workspace_detail_key, workspace_members_key,
+    invalidate_workspace_caches,
+    TTL_WORKSPACE, TTL_MEMBERS,
+)
+
 
 User = get_user_model()
 
@@ -54,6 +62,26 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             Q(members__user=user)
         ).distinct()
 
+    def list(self, request, *args, **kwargs):
+        key = workspace_list_key(request.user.id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache_set(key, response.data, TTL_WORKSPACE)
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        key = workspace_detail_key(kwargs.get("pk"), request.user.id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
+        response = super().retrieve(request, *args, **kwargs)
+        cache_set(key, response.data, TTL_WORKSPACE)
+        return response
+
     def perform_create(self, serializer):
         workspace = serializer.save(owner=self.request.user)
 
@@ -64,7 +92,20 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             role="owner",
         )
 
+        # Invalidate workspace list cache
+        cache_delete(workspace_list_key(self.request.user.id))
+
         return workspace
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        invalidate_workspace_caches(instance.id, self.request.user.id)
+
+    def perform_destroy(self, instance):
+        workspace_id = instance.id
+        user_id = self.request.user.id
+        instance.delete()
+        invalidate_workspace_caches(workspace_id, user_id)
 
 
     @action(detail=True, methods=["get"], url_path="members")
@@ -72,11 +113,17 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         workspace = self.get_object()
         self.check_object_permissions(request, workspace)
 
+        key = workspace_members_key(workspace.id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
         members = WorkspaceMember.objects.filter(
             workspace=workspace
         ).select_related("user")
 
         serializer = WorkspaceMemberSerializer(members, many=True)
+        cache_set(key, serializer.data, TTL_MEMBERS)
         return Response(serializer.data)
 
 class CreateWorkspaceInvitationView(generics.CreateAPIView):
@@ -105,7 +152,6 @@ class CreateWorkspaceInvitationView(generics.CreateAPIView):
                 user=self.request.user
             )
             if member.role not in ["owner", "admin"]:
-                # We raise a PermissionDenied or return Response (GenericAPIView prefers exceptions usually)
                 raise serializers.ValidationError({"detail": "Only admins can invite users."})
         except WorkspaceMember.DoesNotExist:
              raise serializers.ValidationError({"detail": "You are not a member of this workspace."})
@@ -115,8 +161,6 @@ class CreateWorkspaceInvitationView(generics.CreateAPIView):
             workspace=workspace,
             invited_by=self.request.user
         )
-
-        
 
 
 
@@ -176,7 +220,6 @@ class RemoveWorkspaceMemberView(generics.DestroyAPIView):
             )
 
         # Prevent Admins from kicking other Admins (Optional, usually reserved for Owner)
-        # If you want Admins to kick other Admins, remove this block.
         if requester_membership.role == 'admin' and target_membership.role == 'admin':
              return Response(
                 {"error": "Admins cannot remove other admins. Contact the Owner."}, 
@@ -185,6 +228,9 @@ class RemoveWorkspaceMemberView(generics.DestroyAPIView):
 
         # 5. Perform the Kick
         target_membership.delete()
+
+        # 6. Invalidate caches
+        invalidate_workspace_caches(workspace_id, request.user.id)
 
         return Response(
             {"message": f"User {target_user.email} has been removed from the workspace."},
@@ -224,6 +270,9 @@ class LeaveWorkspaceView(generics.DestroyAPIView):
 
         # 3. Process the leave action
         membership.delete()
+
+        # 4. Invalidate caches
+        invalidate_workspace_caches(workspace_id, request.user.id)
 
         return Response(
             {"message": f"You have successfully left {workspace.name}."},
@@ -277,7 +326,11 @@ class AcceptWorkspaceInvitationView(APIView):
             role=invite.role,
         )
 
+        workspace_id = invite.workspace.id
         invite.delete()  # invitations are one-time
+
+        # Invalidate caches
+        invalidate_workspace_caches(workspace_id, user.id)
 
         return Response(
             {"message": "You have joined the workspace."},
@@ -329,6 +382,10 @@ class WorkspaceImageUploadView(generics.UpdateAPIView):
 
         return workspace
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        invalidate_workspace_caches(instance.id, self.request.user.id)
+
 
 class WorkspaceMemberRoleView(APIView):
     permission_classes = [
@@ -375,6 +432,9 @@ class WorkspaceMemberRoleView(APIView):
         member.role = role
         member.save(update_fields=["role"])
 
+        # Invalidate caches
+        invalidate_workspace_caches(workspace_id, request.user.id)
+
         return Response(
             {
                 "message": "Role updated successfully.",
@@ -383,5 +443,3 @@ class WorkspaceMemberRoleView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
-

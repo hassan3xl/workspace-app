@@ -7,8 +7,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 from django.db import models
-# from workspace.permissions.project_permissions import HasProjectAccess
-# from workspace.permissions.workspace_permissions import IsWorkspaceMember
 from workspace.permissions.permissions import (
     IsProjectCollaboratorOrWorkspaceAdmin, 
     IsTaskCollaboratorOrProjectAdmin,
@@ -42,6 +40,14 @@ from workspace.workspace_services import (
     add_project_member_service
 )
 from django.db.models import Q
+
+# Caching
+from workspace.cache_utils import (
+    cache_get, cache_set, cache_delete,
+    project_list_key, task_list_key, comment_list_key,
+    invalidate_project_caches, invalidate_task_caches,
+    TTL_PROJECT, TTL_TASK, TTL_COMMENT,
+)
 
 
 # ----------------------- PROJECT -----------------------
@@ -79,6 +85,17 @@ class ProjectViewSet(viewsets.ModelViewSet):
             Q(members__user=user)
         ).distinct()
 
+    def list(self, request, *args, **kwargs):
+        workspace_id = self.kwargs.get("workspace_id")
+        key = project_list_key(workspace_id, request.user.id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache_set(key, response.data, TTL_PROJECT)
+        return response
+
     def perform_create(self, serializer):
         workspace_id = self.kwargs.get("workspace_id")
         workspace = get_object_or_404(Workspace, id=workspace_id)
@@ -89,6 +106,20 @@ class ProjectViewSet(viewsets.ModelViewSet):
             project_data=serializer.validated_data
         )
 
+        # Invalidate project list cache
+        invalidate_project_caches(workspace_id, user_id=self.request.user.id)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        workspace_id = self.kwargs.get("workspace_id")
+        invalidate_project_caches(workspace_id, project_id=instance.id, user_id=self.request.user.id)
+
+    def perform_destroy(self, instance):
+        workspace_id = self.kwargs.get("workspace_id")
+        project_id = instance.id
+        instance.delete()
+        invalidate_project_caches(workspace_id, project_id=project_id, user_id=self.request.user.id)
+
 
 class TaskListCreateView(generics.ListCreateAPIView):
     permission_classes = [
@@ -96,19 +127,26 @@ class TaskListCreateView(generics.ListCreateAPIView):
     ]
 
     def get_serializer_class(self):
-        # "self.action" does not exist in Generic Views, use request.method
         if self.request.method == 'POST':
             return TaskWriteSerializer
         return TaskSerializer
 
     def get_queryset(self):
-        # Optimization: Fetch workspace/project ONCE to validate existence, 
-        # but you don't need to fetch them just to filter the tasks if you trust the IDs.
-        # Ideally, validate hierarchy:
         return Task.objects.filter(
             project__id=self.kwargs["project_id"], 
             project__workspace_id=self.kwargs["workspace_id"]
         ).order_by("-created_at")
+
+    def list(self, request, *args, **kwargs):
+        project_id = self.kwargs.get("project_id")
+        key = task_list_key(project_id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache_set(key, response.data, TTL_TASK)
+        return response
 
     def perform_create(self, serializer):
         workspace_id = self.kwargs.get("workspace_id")
@@ -121,14 +159,11 @@ class TaskListCreateView(generics.ListCreateAPIView):
         # 1. Save the task first (to get an ID and Object)
         task = serializer.save(project=project, created_by=user)
 
-        # 2. Notifications (Refined)
-        # We perform this AFTER save to ensure the task actually exists
-        members = project.members.all().select_related('user') # Optimization
-        # recipient_users = [m.user for m in members if m.user != user] # Exclude self
-        
-        # We only want to notify the ASSIGNED user for now, or if we implement @mentions later.
-        # But per user request: "send notification for a user if a task created and they are tagged in"
-        # "Tagged in" usually means assigned.
+        # 2. Invalidate task list cache
+        invalidate_task_caches(workspace_id, project_id, user_id=user.id)
+
+        # 3. Notifications
+        members = project.members.all().select_related('user')
         
         recipients = []
         if task.assigned_to and task.assigned_to != user:
@@ -140,7 +175,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
                 actor=user,
                 title="Assigned to New Task",
                 message=f"{user.profile.username} assigned you to a new task: '{task.title}' in '{project.title}'.",
-                target_obj=task, # Point to the task
+                target_obj=task,
                 category='task_assigned',
             )
 
@@ -162,7 +197,6 @@ class TaskRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
         workspace = get_object_or_404(Workspace, id=workspace_id)
         project = get_object_or_404(Project, id=project_id, workspace=workspace)
 
-
         return Task.objects.filter(project=project)
 
     def perform_update(self, serializer):
@@ -175,19 +209,24 @@ class TaskRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
         project = get_object_or_404(Project, id=project_id, workspace=workspace)
         task = get_object_or_404(Task, id=task_id, project=project)
 
-
         serializer.save(project=project)
+
+        # Invalidate caches
+        invalidate_task_caches(workspace_id, project_id, task_id=task_id, user_id=user.id)
 
     def perform_destroy(self, instance):
         workspace_id = self.kwargs.get("workspace_id")
         project_id = self.kwargs.get("project_id")
+        task_id = instance.id
         user = self.request.user
 
         workspace = get_object_or_404(Workspace, id=workspace_id)
         project = get_object_or_404(Project, id=project_id, workspace=workspace)
 
-
         instance.delete()
+
+        # Invalidate caches
+        invalidate_task_caches(workspace_id, project_id, task_id=task_id, user_id=user.id)
 
 
 # ----------------------- PROJECT MEMBERS -----------------------
@@ -219,19 +258,13 @@ class ProjectMemberView(generics.ListCreateAPIView):
         # 2. Get Data
         project = get_object_or_404(Project, id=project_id)
         
-        # We manually validate using the serializer to get the 'user_id' cleanly
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # Extract user_id from serializer (assuming you have user_id in write_only fields)
-        # Note: If your serializer expects a full object, adjust accordingly.
-        # Assuming serializer has 'user_id' field:
         user_id = serializer.validated_data.get('user_id') 
-        # OR if you used PrimaryKeyRelatedField:
         target_user = serializer.validated_data.get('user') 
 
         if not target_user:
-             # Fallback if using raw ID
              target_user = get_object_or_404(User, id=request.data.get('user_id'))
 
         # 3. Additional Validation
@@ -249,6 +282,9 @@ class ProjectMemberView(generics.ListCreateAPIView):
             role=serializer.validated_data.get('permission', 'read')
         )
 
+        # 5. Invalidate project cache
+        invalidate_project_caches(workspace_id, project_id=project_id, user_id=request.user.id)
+
         return Response(ProjectMemberSerializer(member).data, status=status.HTTP_201_CREATED)
 
 # ----------------------- TASK ACTIONS -----------------------
@@ -260,10 +296,9 @@ class StartTaskView(APIView):
 
 
     def post(self, request, workspace_id, project_id, task_id):
-        # Validation Logic stays in View (Fast fail)
         task = get_object_or_404(Task, id=task_id, project_id=project_id, project__workspace_id=workspace_id)
 
-        if task.status != 'pending': # Assuming 'pending' is the string value
+        if task.status != 'pending':
             return Response({"detail": "Task is not in pending state."}, status=status.HTTP_400_BAD_REQUEST)
         
         if task.started_by is not None:
@@ -271,6 +306,9 @@ class StartTaskView(APIView):
 
         # Service Call
         updated_task = start_task_service(request.user, task)
+
+        # Invalidate caches
+        invalidate_task_caches(workspace_id, project_id, task_id=task_id, user_id=request.user.id)
         
         return Response(TaskSerializer(updated_task).data)
 
@@ -285,17 +323,17 @@ class CompleteTaskView(APIView):
     def post(self, request, workspace_id, project_id, task_id):
         task = get_object_or_404(Task, id=task_id, project_id=project_id)
 
-        # Specific Logic: Only the person who started it can finish it? 
-        # (Or maybe Admins too? Adjust logic as needed)
         if task.status != 'in_progress':
              return Response({"detail": "Task is not in progress."}, status=status.HTTP_400_BAD_REQUEST)
              
         if task.started_by != request.user:
-            # You might want to allow Project Admins to override this check
             return Response({"detail": "You are not the user that started this task."}, status=status.HTTP_403_FORBIDDEN)
 
         # Service Call
         updated_task = complete_task_service(request.user, task)
+
+        # Invalidate caches
+        invalidate_task_caches(workspace_id, project_id, task_id=task_id, user_id=request.user.id)
 
         return Response(TaskSerializer(updated_task).data)
 
@@ -309,13 +347,22 @@ class CommentListCreateView(generics.ListCreateAPIView):
     ]
     
     def get_queryset(self):
-        # We don't need the service for GET, just standard optimization
         return Comment.objects.filter(
             task_id=self.kwargs.get("task_id")
         ).select_related('author').order_by("created_at")
 
+    def list(self, request, *args, **kwargs):
+        task_id = self.kwargs.get("task_id")
+        key = comment_list_key(task_id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache_set(key, response.data, TTL_COMMENT)
+        return response
+
     def perform_create(self, serializer):
-        # Get the Task object
         task = get_object_or_404(
             Task, 
             id=self.kwargs.get("task_id"), 
@@ -329,6 +376,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
             content=serializer.validated_data['content']
         )
 
+        # Invalidate comment cache
+        cache_delete(comment_list_key(task.id))
+
 
 class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
@@ -341,7 +391,6 @@ class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_url_kwarg = "comment_id"
 
     def get_queryset(self):
-        # Validation of hierarchy
         workspace_id = self.kwargs.get("workspace_id")
         project_id = self.kwargs.get("project_id")
         task_id = self.kwargs.get("task_id")
@@ -352,19 +401,23 @@ class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             task__project__workspace__id=workspace_id
         )
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        cache_delete(comment_list_key(instance.task_id))
+
+    def perform_destroy(self, instance):
+        task_id = instance.task_id
+        instance.delete()
+        cache_delete(comment_list_key(task_id))
+
     def check_object_permissions(self, request, obj):
         super().check_object_permissions(request, obj)
-        
-        # Specific Logic: 
-        # 1. Author can edit/delete
-        # 2. Admins/Owners can delete (but maybe not edit content?)
         
         if request.method in ['PUT', 'PATCH']:
             if obj.author != request.user:
                 raise PermissionDenied("You can only edit your own comments.")
         
         if request.method == 'DELETE':
-            # Check if admin/owner of workspace
             is_admin = WorkspaceMember.objects.filter(
                 workspace_id=self.kwargs.get("workspace_id"),
                 user=request.user,

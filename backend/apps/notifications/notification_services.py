@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from .models import Notification
+from workspace.cache_utils import invalidate_notification_cache
 
 class NotificationService:
     
@@ -18,10 +19,13 @@ class NotificationService:
             actor=actor,
             title=title,
             message=message,
-            target=target_obj, # Django handles content_type/object_id assignment automatically
+            target=target_obj,
             category=category,
             type=type
         )
+
+        # 3. Invalidate notification cache for the recipient
+        invalidate_notification_cache(recipient.id)
 
         # --- FUTURE PROOFING ---
         # This is where you would add:
@@ -57,4 +61,10 @@ class NotificationService:
         ]
         
         # bulk_create is much faster than looping .create()
-        return Notification.objects.bulk_create(notifications)
+        created = Notification.objects.bulk_create(notifications)
+
+        # Invalidate notification cache for all recipients
+        for user in valid_recipients:
+            invalidate_notification_cache(user.id)
+
+        return created

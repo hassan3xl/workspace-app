@@ -16,6 +16,13 @@ from workspace.permissions.permissions import (
     IsWorkspaceMemberOrAdmin,
 )
 
+# Caching
+from workspace.cache_utils import (
+    cache_get, cache_set,
+    dashboard_key,
+    TTL_DASHBOARD,
+)
+
 class WorkspaceDashboardView(APIView):
     permission_classes = [
         IsAuthenticated,
@@ -24,6 +31,13 @@ class WorkspaceDashboardView(APIView):
 
     def get(self, request, workspace_id):
         user = request.user
+
+        # Check cache first
+        key = dashboard_key(workspace_id, user.id)
+        cached = cache_get(key)
+        if cached is not None:
+            return Response(cached)
+
         workspace = get_object_or_404(Workspace, id=workspace_id)
 
         # 1. Verify Membership
@@ -31,7 +45,6 @@ class WorkspaceDashboardView(APIView):
             return Response({"error": "Access denied"}, status=403)
 
         # 2. Get Active Projects
-        # We annotate (calculate) task counts directly in the database
         projects_queryset = Project.objects.filter(
             workspace=workspace, 
             status__in=['active', 'planning']
@@ -70,5 +83,8 @@ class WorkspaceDashboardView(APIView):
             "activities": ActivityLogSerializer(activity_queryset, many=True).data,
             "recent_members": DashboardMemberSerializer(members_queryset, many=True).data
         }
+
+        # Cache the response
+        cache_set(key, data, TTL_DASHBOARD)
 
         return Response(data)

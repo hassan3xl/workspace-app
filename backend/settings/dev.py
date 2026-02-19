@@ -47,15 +47,13 @@ STORAGES = {
 }
 
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": os.getenv("REDIS_URL", "redis://redis:6379/1"),
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         },
-#     }
-# }
+# Cache: Use in-memory for local dev (no Redis needed)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "workn-dev-cache",
+    }
+}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
