@@ -4,6 +4,7 @@ import withPWA from "next-pwa";
 const isDev = process.env.NODE_ENV === "development";
 
 const config: NextConfig = {
+  output: "standalone",
   // No turbopack config needed unless customizing behavior
   images: {
     remotePatterns: [
