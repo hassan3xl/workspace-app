@@ -57,25 +57,18 @@ INSTALLED_APPS = [
     'notifications',
     'router',
 
-]
+    "users",
+    "workspace",
+    'notifications',
+    'router',
 
-AUTH_USER_MODEL = "users.User"
+],
 
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOW_CREDENTIALS = True
+# Use environment variable for CORS_ALLOWED_ORIGINS
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://flowstack-gamma.vercel.app",
-]
-
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://flowstack-backend.onrender.com",
-    "https://flowstack-gamma.vercel.app",
-]
+# Use environment variable for CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 
 
 CLOUDINARY_STORAGE = {
