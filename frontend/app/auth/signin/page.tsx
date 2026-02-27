@@ -35,7 +35,7 @@ export default function LoginPage() {
         await handleLogin(response.user, response.access, response.refresh);
         // Allow the cookie to set before redirecting
         setTimeout(() => {
-          window.location.href = "/home";
+          window.location.href = "/";
         }, 500);
       }
     } finally {

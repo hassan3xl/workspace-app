@@ -261,7 +261,7 @@ const HomeWithoutAuth = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                How Workn Works
+                How Workspace Works
               </h2>
               <p className="text-xl text-muted-foreground">
                 Get your team up and running in minutes
@@ -296,7 +296,8 @@ const HomeWithoutAuth = () => {
                 Trusted by teams worldwide
               </h2>
               <p className="text-muted-foreground">
-                Join thousands of teams already using Workn
+                Join thousands of teams already using Workspace to get more done
+                together.
               </p>
             </div>
 
@@ -330,7 +331,7 @@ const HomeWithoutAuth = () => {
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                     <Zap className="w-5 h-5 text-primary-foreground" />
                   </div>
-                  <span className="text-xl font-bold">workn</span>
+                  <span className="text-xl font-bold">Workspace</span>
                 </div>
                 <p className="text-muted-foreground text-sm">
                   The complete workspace for modern teams
@@ -413,7 +414,7 @@ const HomeWithoutAuth = () => {
 
             <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-                © 2025 workn. All rights reserved.
+                © 2025 Workspace. All rights reserved.
               </p>
               <div className="flex space-x-6">
                 <a

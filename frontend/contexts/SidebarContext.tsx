@@ -11,7 +11,7 @@ interface SidebarContextType {
 }
 
 const SIDEBAR_WIDTH = 248;
-const STORAGE_KEY = "workn-sidebar-open";
+const STORAGE_KEY = "Workspace-sidebar-open";
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 

@@ -51,7 +51,7 @@ export function Navbar() {
                 src="/logo.png"
                 width={150}
                 height={5}
-                alt="Workn Logo"
+                alt="Workspace Logo"
                 className="w-32 sm:w-[150px] h-auto"
               />
             </Link>

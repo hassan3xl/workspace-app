@@ -32,7 +32,7 @@ export function WorkspaceNavbar({ workspace }: WorkspaceNavbarProps) {
                 src="/favicon.png"
                 width={25}
                 height={25}
-                alt="Workn Logo"
+                alt="Workspace Logo"
               />
             </Link>
           </div>
