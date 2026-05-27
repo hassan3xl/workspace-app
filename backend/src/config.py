@@ -40,12 +40,10 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = (
-    os.getenv("ALLOWED_HOSTS") or "localhost,127.0.0.1"
+    os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
 ).split(",")
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "").split(",") if origin.strip()]
-
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS", ""
 ).split(",")

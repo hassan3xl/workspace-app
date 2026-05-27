@@ -6,21 +6,24 @@ DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-).split(",")
 from ..config import (
     CORS_ALLOWED_ORIGINS,
+    ALLOWED_HOSTS,
     ALLOWED_ORIGINS,
     PRODUCTION_DB,
 )
+CORS_ALLOWED_ORIGINS=CORS_ALLOWED_ORIGINS
+ALLOWED_ORIGINS=ALLOWED_ORIGINS
+ALLOWED_HOSTS=ALLOWED_HOSTS
 
 
 DATABASES = {
-
-    "default": dj_database_url.config(default=os.getenv("PRODUCTION_DB"))
+    "default": dj_database_url.config(
+        default=os.environ.get("PRODUCTION_DB"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
-
 STORAGES = {
     # Media: Goes to Cloudinary
     "default": {
