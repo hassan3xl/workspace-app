@@ -1,31 +1,25 @@
-# 1. Start with a lightweight Python base image
-FROM python:3.11-slim
+# Use a stable Debian-based Python image
+FROM python:3.11-slim-bookworm
 
-# 2. Set environment variables
-# PYTHONDONTWRITEBYTECODE: Prevents Python from writing .pyc files
-# PYTHONUNBUFFERED: Ensures logs are output immediately to the terminal
+# Prevent Python from writing .pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 3. Set the working directory inside the container
 WORKDIR /app
 
-# 4. Install system dependencies (optional, but good for Postgres/other libs)
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
+# Install system dependencies
+# libpq5 is enough for the database driver at runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Copy your requirements file first (for caching layers)
-COPY requirements.txt /app/
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Copy the rest of the code
+COPY . .
 
-# 7. Copy the rest of your application code
-COPY . /app/
-
-# 8. Command to run when the container starts
-# We use 0.0.0.0 so the container listens on all interfaces (crucial for Docker)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Command to run entrypoint script
+CMD ["bash", "entrypoint.sh"]
