@@ -9,12 +9,16 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS",
 ).split(",")
-
+from ..config import (
+    CORS_ALLOWED_ORIGINS,
+    ALLOWED_ORIGINS,
+    PRODUCTION_DB,
+)
 
 
 DATABASES = {
 
-    "default": dj_database_url.config(default=os.getenv("NEON_DB"))
+    "default": dj_database_url.config(default=os.getenv("PRODUCTION_DB"))
 }
 
 STORAGES = {

@@ -37,7 +37,8 @@ if db_url and "neon.tech" in db_url:
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=db_url,
+        # default=db_url,
+        default=os.getenv("PRODUCTION_DB"),
         conn_max_age=600,
         ssl_require=ssl_require,
     )
