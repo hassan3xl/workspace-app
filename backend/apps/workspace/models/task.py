@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 import uuid
 
-from users.models import User
-from workspace.models import Workspace, task, Project
+from apps.users.models import User
+from apps.workspace.models import Workspace, task, Project
 
 
 class Task(models.Model):

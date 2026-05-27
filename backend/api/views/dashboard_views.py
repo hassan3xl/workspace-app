@@ -5,12 +5,18 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 
-from workspace.models import Workspace, Project, Task, ActivityLog, WorkspaceMember
+from apps.workspace.models import Workspace, Project, Task, ActivityLog, WorkspaceMember
+from api.serializers.dashboard_serializers import (
+    DashboardProjectSerializer,
+    DashboardTaskSerializer,
+    ActivityLogSerializer,
+    DashboardMemberSerializer
+)
 
 
 
 # pyrefly: ignore [missing-import]
-from workspace.permissions.permissions import (
+from apps.workspace.permissions.permissions import (
     IsWorkspaceMemberOrAdmin,
 )
 

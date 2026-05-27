@@ -10,7 +10,7 @@ from rest_framework import generics, views, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from notifications.models import Notification
+from apps.notifications.models import Notification
 from api.serializers.notification_serializers import NotificationSerializer
 
 class NotificationListView(generics.ListAPIView):

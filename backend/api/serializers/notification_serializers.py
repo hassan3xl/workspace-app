@@ -1,6 +1,6 @@
 # # serializers.py
 from rest_framework import serializers
-from notifications.models import Notification
+from apps.notifications.models import Notification
 from rest_framework import serializers
 from api.serializers.user_serializers import UserSerializer
 

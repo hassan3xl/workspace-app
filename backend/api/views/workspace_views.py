@@ -8,11 +8,11 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import NotFound
 
-from workspace.permissions.permissions import (
+from apps.workspace.permissions.permissions import (
     IsWorkspaceMemberOrAdmin,
 )
 
-from workspace.models import (
+from apps.workspace.models import (
     Workspace,
     WorkspaceMember,
     WorkspaceInvitation,
@@ -30,7 +30,7 @@ from api.serializers.workspace_serializers import (
 )
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from notifications.notification_services import NotificationService
+from apps.notifications.notification_services import NotificationService
 
 
 User = get_user_model()

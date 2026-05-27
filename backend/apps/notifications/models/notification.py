@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from users.models import User
+from apps.users.models import User
 import uuid
 
 class Notification(models.Model):

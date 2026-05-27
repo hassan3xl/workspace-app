@@ -12,7 +12,7 @@ interface User {
 export async function handleLogin(
   user: User,
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
 ) {
   const cookieStore = await cookies();
 
@@ -74,12 +74,12 @@ export async function refreshToken(): Promise<string | null> {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/token/refresh/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh: refreshTokenValue }),
-      }
+      },
     );
 
     if (!response.ok) {

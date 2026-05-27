@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from users.models import Profile
-from notifications.notification_services import NotificationService
+from apps.users.models import Profile
+from apps.notifications.notification_services import NotificationService
 
 User = get_user_model()
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
-from notifications.notification_services import NotificationService
+from apps.notifications.notification_services import NotificationService
 
 class CustomRegisterSerializer(RegisterSerializer):
     username = None 

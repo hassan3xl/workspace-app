@@ -8,8 +8,8 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework import status
 from ..serializers.auth_serializers import CustomRegisterSerializer, LoginSerializer
 from rest_framework.views import APIView
-from users.utils.send_otp import send_otp_email
-from users.models import OTPRequest
+from apps.users.utils.send_otp import send_otp_email
+from apps.users.models import OTPRequest
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client

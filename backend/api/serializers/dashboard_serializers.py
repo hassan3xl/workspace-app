@@ -1,6 +1,6 @@
 # workspace/serializers.py
 from rest_framework import serializers
-from workspace.models import Workspace, WorkspaceMember, WorkspaceInvitation, WorkspaceChannel, Project, Task, ActivityLog
+from apps.workspace.models import Workspace, WorkspaceMember, WorkspaceInvitation, WorkspaceChannel, Project, Task, ActivityLog
 from api.serializers.user_serializers import UserSerializer 
 
 class DashboardMemberSerializer(serializers.ModelSerializer):

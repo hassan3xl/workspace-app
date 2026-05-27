@@ -16,7 +16,7 @@ from api.views.dashboard_views import (
 )
 
 router = DefaultRouter()
-router.register(r'workspaces', WorkspaceViewSet, basename='workspace')
+router.register(r'', WorkspaceViewSet, basename='workspace')
 
 
 urlpatterns = [

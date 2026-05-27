@@ -5,7 +5,7 @@ from api.serializers.user_serializers import (
     AccountUserSerializer
 )
 from django.utils import timezone
-from users.models import Profile
+from apps.users.models import Profile
 from api.serializers.profile_serializers import (
     AccountProfileSerializer,
     AccountProfileAvatarSerializer

@@ -36,7 +36,9 @@ if [ "$DJANGO_ENV" = "production" ]; then
       --bind 0.0.0.0:${PORT:-10000} \
       --workers 1 \
       --threads 2 \
-      --timeout 120
+      --timeout 120 \
+      --access-logfile - \
+      --error-logfile -
 else
   echo "Running in DEVELOPMENT mode"
   

@@ -1,7 +1,7 @@
 # workspace/services.py
 from django.db import transaction
 from .models import Task, ActivityLog, Project, ProjectMember, WorkspaceMember, Comment
-from notifications.notification_services import NotificationService
+from apps.notifications.notification_services import NotificationService
 from django.utils import timezone
 
 

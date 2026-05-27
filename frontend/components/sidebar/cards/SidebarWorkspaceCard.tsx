@@ -22,6 +22,7 @@ export default function SidebarWorkspaceCard() {
 
   if (isLoading) return;
   if (!workspaces || workspaces.length === 0) return null;
+  console.log(workspaces);
 
   return (
     <div className="flex flex-col gap-2">
@@ -43,7 +44,7 @@ export default function SidebarWorkspaceCard() {
               // Mobile layout
               "p-2 rounded-lg hover:bg-accent/50",
               // Desktop layout
-              "md:p-0 md:bg-transparent md:hover:bg-transparent"
+              "md:p-0 md:bg-transparent md:hover:bg-transparent",
             )}
           >
             {/* Active indicator (desktop) */}
@@ -52,7 +53,7 @@ export default function SidebarWorkspaceCard() {
                 "absolute left-[-12px] bg-primary rounded-r-full transition-all duration-300 md:block hidden",
                 isActive
                   ? "h-[32px] w-[4px]"
-                  : "h-[8px] w-[4px] scale-0 group-hover:scale-100"
+                  : "h-[8px] w-[4px] scale-0 group-hover:scale-100",
               )}
             />
 
@@ -66,7 +67,7 @@ export default function SidebarWorkspaceCard() {
                   : "rounded-[24px] group-hover:rounded-[16px]",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "bg-card text-foreground group-hover:bg-primary group-hover:text-white"
+                  : "bg-card text-foreground group-hover:bg-primary group-hover:text-white",
               )}
             >
               {workspace.logo ? (
@@ -86,13 +87,13 @@ export default function SidebarWorkspaceCard() {
             <div
               className={cn(
                 "md:hidden flex flex-col items-start",
-                !isOpen && "hidden"
+                !isOpen && "hidden",
               )}
             >
               <span
                 className={cn(
                   "font-semibold text-sm",
-                  isActive && "text-primary"
+                  isActive && "text-primary",
                 )}
               >
                 {workspace.name}

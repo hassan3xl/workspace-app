@@ -1,7 +1,7 @@
 # serializers.py
 from rest_framework import serializers
 from api.serializers.user_serializers import UserSerializer
-from workspace.models import Workspace, Project, Task, Comment, ProjectMember, WorkspaceMember
+from apps.workspace.models import Workspace, Project, Task, Comment, ProjectMember, WorkspaceMember
 from django.utils import timezone
 from rest_framework.validators import UniqueTogetherValidator
 

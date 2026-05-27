@@ -7,15 +7,15 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 from django.db import models
-# from workspace.permissions.project_permissions import HasProjectAccess
-# from workspace.permissions.workspace_permissions import IsWorkspaceMember
-from workspace.permissions.permissions import (
+# from apps.workspace.permissions.project_permissions import HasProjectAccess
+# from apps.workspace.permissions.workspace_permissions import IsWorkspaceMember
+from apps.workspace.permissions.permissions import (
     IsProjectCollaboratorOrWorkspaceAdmin, 
     IsTaskCollaboratorOrProjectAdmin,
     IsCommentVisibleToUser
 )
 
-from workspace.models import (
+from apps.workspace.models import (
     Project, 
     Task, 
     ProjectMember, 
@@ -23,7 +23,7 @@ from workspace.models import (
     WorkspaceMember, 
     Comment
 )
-from users.models import User
+from apps.users.models import User
 
 from api.serializers.project_serializers import (
     ProjectSerializer,
@@ -33,8 +33,8 @@ from api.serializers.project_serializers import (
     CommentSerializer,
     ProjectMemberSerializer
 )
-from notifications.notification_services import NotificationService
-from workspace.services import (
+from apps.notifications.notification_services import NotificationService
+from apps.workspace.services import (
     create_project_service,
     start_task_service, 
     create_comment_service,

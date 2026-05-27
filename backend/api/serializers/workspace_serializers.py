@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from users.models import User
-from workspace.models import Workspace, WorkspaceMember, WorkspaceInvitation, WorkspaceChannel
+from apps.users.models import User
+from apps.workspace.models import Workspace, WorkspaceMember, WorkspaceInvitation, WorkspaceChannel
 from api.serializers.user_serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 
-from notifications.notification_services import NotificationService
+from apps.notifications.notification_services import NotificationService
 
 User = get_user_model()
 

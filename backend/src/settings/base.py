@@ -21,8 +21,6 @@ from decouple import config
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # Application definition
-import sys
-sys.path.append(str(BASE_DIR.parent / 'apps'))
 
 INSTALLED_APPS = [
     # static file

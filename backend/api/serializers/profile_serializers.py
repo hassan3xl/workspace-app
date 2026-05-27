@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from users.models import User, Profile
+from apps.users.models import User, Profile
 from django.utils import timezone
 import uuid
 
