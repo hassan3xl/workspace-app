@@ -24,17 +24,6 @@ DATABASES = {
         ssl_require=True,
     )
 }
-STORAGES = {
-    # Media: Goes to Cloudinary
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    
-    # Static: Stays local (or use WhiteNoise in production)
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
 
 
 # Free-tier friendly cache

@@ -56,10 +56,10 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
-
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
+WSGI_APPLICATION = "src.wsgi.application"
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -154,7 +154,21 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "src.wsgi.application"
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+    },
+}
+
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticHashedCloudinaryStorage"
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -185,13 +199,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
-
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_URL = "media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
