@@ -18,12 +18,14 @@ from src.config import (
     PRODUCTION_DB,
     DOCKER_DB,
     LOCAL_DB,
+    CORS_ALLOWED_ORIGINS,
 )
 
 # Use config values (SECRET_KEY from base is a default, override with env if needed)
 SECRET_KEY = CONFIG_SECRET_KEY
 ALLOWED_HOSTS = ALLOWED_HOSTS
 ALLOWED_ORIGINS = ALLOWED_ORIGINS
+CORS_ALLOWED_ORIGINS=CORS_ALLOWED_ORIGINS
 
 db_url = (
     os.environ.get("LOCAL_DB")
@@ -37,8 +39,8 @@ if db_url and "neon.tech" in db_url:
 
 DATABASES = {
     "default": dj_database_url.config(
-        # default=db_url,
-        default=os.getenv("PRODUCTION_DB"),
+        default=db_url,
+        # default=os.getenv("PRODUCTION_DB"),
         conn_max_age=600,
         ssl_require=ssl_require,
     )

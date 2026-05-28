@@ -16,14 +16,14 @@ from api.views.project_views import (
 # ----------------------- ROUTERS -----------------------
 router = routers.SimpleRouter()
 router.register(
-    r'workspaces/(?P<workspace_id>[^/.]+)/projects',
+    r'(?P<workspace_id>[^/.]+)/projects',
     ProjectViewSet,
     basename='workspace-projects'
 )
 
 projects_router = routers.NestedSimpleRouter(
     router,
-    r'workspaces/(?P<workspace_id>[^/.]+)/projects',
+    r'(?P<workspace_id>[^/.]+)/projects',
     lookup='project'
 )
 # You can register nested viewsets here if needed
@@ -36,39 +36,39 @@ urlpatterns = [
 
     # Tasks
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/",
         TaskListCreateView.as_view(),
         name="project-tasks"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/",
         TaskRetrieveUpdateView.as_view(),
         name="project-task-detail"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/start/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/start/",
         StartTaskView.as_view(),
         name="start-task"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/complete/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/complete/",
         CompleteTaskView.as_view(),
         name="complete-task"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/",
         CommentListCreateView.as_view(),
         name="task-comment"
     ),
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/<uuid:comment_id>/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/tasks/<uuid:task_id>/comments/<uuid:comment_id>/",
         CommentRetrieveUpdateDestroyView.as_view(),
         name="task-comment-detail"
     ),
 
     # Project members
     path(
-        "workspaces/<uuid:workspace_id>/projects/<uuid:project_id>/collaborators/",
+        "<uuid:workspace_id>/projects/<uuid:project_id>/collaborators/",
         ProjectMemberView.as_view(),
         name="project-collaborators"
     ),

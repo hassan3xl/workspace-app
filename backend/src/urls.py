@@ -24,9 +24,6 @@ urlpatterns = [
 
     # workspace urls
     path('api/workspaces/', include("api.routes.workspace_urls")),
-
-    # projects url
-    path('api/project/', include("api.routes.project_urls")),
     
     # feeds url
     # path('api/feeds/', include("api.routes.feeds_urls")),

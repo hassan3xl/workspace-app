@@ -46,7 +46,7 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({
       reset();
       onClose();
     } catch (error) {
-      toast.error("Failed to add project");
+      throw error;
     }
   };
 

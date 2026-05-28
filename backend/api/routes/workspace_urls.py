@@ -21,6 +21,7 @@ router.register(r'', WorkspaceViewSet, basename='workspace')
 
 urlpatterns = [
 #     # ---------- STATIC / FIXED ROUTES ----------
+
     path(
         "<uuid:workspace_id>/dashboard/",
         WorkspaceDashboardView.as_view(),
@@ -32,6 +33,8 @@ urlpatterns = [
         name="workspace-invitations"
     ),
 
+    # projects url
+    path('', include("api.routes.project_urls")),
 
 ]
 
