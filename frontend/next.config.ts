@@ -16,10 +16,6 @@ const config: NextConfig = {
     ],
   },
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   reactStrictMode: true,
   output: "standalone",
 };

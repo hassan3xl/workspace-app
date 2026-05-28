@@ -216,8 +216,6 @@ DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'  # Or your verified domain
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
-
-
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None  
 ACCOUNT_EMAIL_VERIFICATION = "none"      
 ACCOUNT_LOGIN_METHODS = {"email"}
