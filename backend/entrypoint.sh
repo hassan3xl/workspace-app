@@ -38,7 +38,8 @@ if [ "$DJANGO_ENV" = "production" ]; then
       --threads 2 \
       --timeout 120 \
       --access-logfile - \
-      --error-logfile -
+      --error-logfile - \
+      --log-level info
 else
   echo "Running in DEVELOPMENT mode"
   
