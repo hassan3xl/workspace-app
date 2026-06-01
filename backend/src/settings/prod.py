@@ -2,20 +2,32 @@ from .base import *
 import os
 import dj_database_url
 
-DEBUG = False
+DEBUG
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 from ..config import (
     CORS_ALLOWED_ORIGINS,
     ALLOWED_HOSTS,
-    ALLOWED_ORIGINS,
     PRODUCTION_DB,
+    DEBUG,
 )
 CORS_ALLOWED_ORIGINS=CORS_ALLOWED_ORIGINS
-ALLOWED_ORIGINS=ALLOWED_ORIGINS
 ALLOWED_HOSTS=ALLOWED_HOSTS
+DEBUG=DEBUG
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'authorization',
+    'content-type',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 DATABASES = {
     "default": dj_database_url.config(
@@ -71,9 +83,6 @@ LOGGING = {
     },
 }
 
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-USE_X_FORWARDED_HOST = True
 
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 

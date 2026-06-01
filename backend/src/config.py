@@ -37,13 +37,9 @@ CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 # Load and parse ALLOWED_ORIGINS
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = os.getenv("DEBUG")
+CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS")
 
-ALLOWED_HOSTS = (
-    os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
-).split(",")
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
-ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "").split(",") if origin.strip()]
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS", ""
-).split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+CORS_ALLOW_HEADERS = os.getenv("CORS_ALLOW_HEADERS").split(",")
