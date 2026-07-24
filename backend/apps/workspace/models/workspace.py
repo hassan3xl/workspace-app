@@ -7,6 +7,7 @@ class Workspace(models.Model):
     VISIBILITY_CHOICES = (
         ('private', 'Private'),
         ('invite', 'Invite Only'),
+        ('public', 'Public'),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

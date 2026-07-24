@@ -24,7 +24,7 @@ interface HeaderProps {
 
 const StatCard = ({ title, value, icon, trend }: StatCardData) => {
   return (
-    <div className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md hover:border-ring transition-all">
+    <div className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md hover:border-ring transition-all">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="text-2xl font-bold text-foreground">{value}</h3>
@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
             stats.length > 2
               ? "lg:grid-cols-2 xl:grid-cols-4"
               : "lg:grid-cols-" + stats.length
-          } gap-6`}
+          } gap-2 md:gap-4 lg:gap-6`}
         >
           {stats.map((stat, index) => (
             <StatCard key={index} {...stat} />

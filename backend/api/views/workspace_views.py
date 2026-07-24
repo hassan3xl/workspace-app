@@ -55,6 +55,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         ).distinct()
 
     def perform_create(self, serializer):
+        template = self.request.data.get("template", "agile")
         workspace = serializer.save(owner=self.request.user)
 
         # Ensure owner is also a member
@@ -63,6 +64,43 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             role="owner",
         )
+
+        # Create starter project & tasks based on selected template
+        if template == "agile":
+            project = Project.objects.create(
+                workspace=workspace,
+                title="Sprint 1 - Agile Board",
+                description="Agile sprint board with Backlog, Active Sprint, In Review, and Done tasks.",
+                status="active",
+                created_by=self.request.user,
+            )
+            ProjectMember.objects.create(project=project, user=self.request.user, permission="write")
+            Task.objects.create(project=project, title="Design Database Schema", description="Setup initial model relations and migrations.", status="completed", priority="high", created_by=self.request.user)
+            Task.objects.create(project=project, title="Implement Auth Flow", description="Frontend & backend authentication integration.", status="in_progress", priority="high", created_by=self.request.user)
+            Task.objects.create(project=project, title="Build User Dashboard UI", description="Modern dashboard widgets and task cards.", status="pending", priority="medium", created_by=self.request.user)
+        elif template == "kanban":
+            project = Project.objects.create(
+                workspace=workspace,
+                title="Kanban Task Tracker",
+                description="Kanban workflow tracking To Do, In Progress, Blocked, and Completed items.",
+                status="active",
+                created_by=self.request.user,
+            )
+            ProjectMember.objects.create(project=project, user=self.request.user, permission="write")
+            Task.objects.create(project=project, title="Setup Project Repository", description="Initialize Git workspace repo and dependencies.", status="completed", priority="medium", created_by=self.request.user)
+            Task.objects.create(project=project, title="Integrate REST API Client", description="Connect React Query with DRF endpoints.", status="in_progress", priority="high", created_by=self.request.user)
+            Task.objects.create(project=project, title="Write E2E Integration Tests", description="Ensure key user flows pass testing.", status="pending", priority="low", created_by=self.request.user)
+        elif template == "roadmap":
+            project = Project.objects.create(
+                workspace=workspace,
+                title="Product Roadmap Q1/Q2",
+                description="High-level product vision, quarter objectives, and feature release milestones.",
+                status="active",
+                created_by=self.request.user,
+            )
+            ProjectMember.objects.create(project=project, user=self.request.user, permission="write")
+            Task.objects.create(project=project, title="Q1 Release Milestone", description="Deliver v1.0 MVP with workspace & messaging features.", status="in_progress", priority="high", created_by=self.request.user)
+            Task.objects.create(project=project, title="Q2 Analytics Expansion", description="Deliver team analytics dashboard and export features.", status="pending", priority="medium", created_by=self.request.user)
 
         return workspace
 

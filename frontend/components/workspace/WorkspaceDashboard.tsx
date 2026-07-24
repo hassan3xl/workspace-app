@@ -43,7 +43,7 @@ const WorkspaceDashboard = () => {
     useGetWorkspaceDashboard(workspaceId);
 
   if (dashboardLoading) {
-    return <Loader variant="dots" title="Loading Workspace Overview..." />;
+    return <Loader page="dashboard" />;
   }
 
   if (!dashboard) return null;
@@ -136,7 +136,7 @@ const WorkspaceDashboard = () => {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/workspace/${workspaceId}/projects`)}
-            className="rounded-lg text-xs gap-1.5 w-full sm:w-auto"
+            className="rounded-lg text-xs gap-1.5 w-auto sm:w-auto"
           >
             <Folder className="w-3.5 h-3.5" />
             All Projects
@@ -145,7 +145,7 @@ const WorkspaceDashboard = () => {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/workspace/${workspaceId}/members`)}
-            className="rounded-lg text-xs gap-1.5 w-full sm:w-auto"
+            className="rounded-lg text-xs gap-1.5 w-auto sm:w-auto"
           >
             <Users className="w-3.5 h-3.5" />
             Members

@@ -179,7 +179,7 @@ const ProjectDetails = () => {
   };
 
   if (loading) {
-    return <Loader variant="dots" title="Loading project details..." />;
+    return <Loader page="project-details" />;
   }
 
   if (error || !project) {

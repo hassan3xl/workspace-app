@@ -54,11 +54,7 @@ const WorkspacesPage = () => {
   const rejectInvite = useRejectWorkspaceInvitation();
 
   const handleCreateClick = () => {
-    if (workspaces && workspaces.length >= 1) {
-      setShowPremiumModal(true);
-    } else {
-      setOpenCreateWorkspaceModal(true);
-    }
+    setOpenCreateWorkspaceModal(true);
   };
 
   const handleAcceptInvite = async (inviteId: string) => {
@@ -84,7 +80,7 @@ const WorkspacesPage = () => {
     return matchesSearch;
   });
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader page="workspaces" />;
 
   return (
     <div className="space-y-8">

@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useGetWorkspaceMembers } from "@/lib/hooks/workspace.hook";
 import WorkspaceMemberCard from "@/components/workspace/WorkspaceMemberCard";
+import Loader from "@/components/Loader";
 
 const WorkspaceMembers = () => {
   const router = useRouter();
@@ -25,6 +26,8 @@ const WorkspaceMembers = () => {
   const { data: members, isLoading } = useGetWorkspaceMembers(workspaceId);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+
+  if (isLoading) return <Loader page="members" />;
 
   // Filtering Logic
   const filteredMembers = members?.filter((member: any) => {

@@ -19,7 +19,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('test/', TestView.as_view(), name='test'),
     
-    # auth urls
+    # allauth & auth urls
+    path('accounts/', include('allauth.urls')),
     path('api/auth/', include("api.routes.auth_urls")),
 
     # workspace urls

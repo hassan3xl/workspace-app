@@ -78,6 +78,10 @@ const WorkspaceSettingsPage = () => {
   const [activeTab, setActiveTab] = useState<
     "general" | "members" | "invites" | "danger"
   >("general");
+
+  if (workspaceLoading) {
+    return <Loader page="settings" />;
+  }
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{

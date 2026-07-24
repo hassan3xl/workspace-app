@@ -30,7 +30,7 @@ const ProjectList = () => {
   const { data: projects, isLoading } = useGetProjects(workspaceId);
   const [searchTerm, setSearchTerm] = useState("");
 
-  if (isLoading) return <Loader variant="dots" title="Loading Projects..." />;
+  if (isLoading) return <Loader page="projects" />;
 
   // Filter Logic (Client side)
   const filteredProjects = projects?.filter((p) =>
