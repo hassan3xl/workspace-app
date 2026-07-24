@@ -1,5 +1,3 @@
-
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
@@ -19,12 +17,15 @@ def create_user_profile(sender, instance, created, **kwargs):
 def format_person_name(name_str):
     if not name_str:
         return ""
-    # Format name into Title Case for each word
     return " ".join([word.capitalize() for word in name_str.strip().split()])
 
 
 def sync_google_profile_data(user, extra_data):
-    if not user or not extra_data:
+    if not user or not user.pk or not extra_data:
+        return
+
+    # Ensure user exists in database before querying/creating profile
+    if not User.objects.filter(pk=user.pk).exists():
         return
 
     profile, _ = Profile.objects.get_or_create(user=user)
@@ -89,12 +90,21 @@ def sync_google_profile_data(user, extra_data):
 
 @receiver(social_account_added)
 def on_social_account_added(request, sociallogin, **kwargs):
-    if sociallogin and sociallogin.account:
+    if sociallogin and sociallogin.account and sociallogin.user:
         sync_google_profile_data(sociallogin.user, sociallogin.account.extra_data)
+
+
+@receiver(user_signed_up)
+def on_user_signed_up(request, user, **kwargs):
+    if user and user.pk:
+        social_account = getattr(user, 'socialaccount_set', None)
+        if social_account:
+            sa = social_account.filter(provider='google').first()
+            if sa:
+                sync_google_profile_data(user, sa.extra_data)
 
 
 @receiver(pre_social_login)
 def on_pre_social_login(request, sociallogin, **kwargs):
-    if sociallogin and sociallogin.account:
+    if sociallogin and sociallogin.account and sociallogin.user and sociallogin.user.pk:
         sync_google_profile_data(sociallogin.user, sociallogin.account.extra_data)
-

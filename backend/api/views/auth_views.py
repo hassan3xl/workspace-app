@@ -28,7 +28,7 @@ class GoogleLogin(SocialLoginView):
         if response.status_code in (200, 201):
             try:
                 user = getattr(self, 'user', None) or (request.user if request.user and request.user.is_authenticated else None)
-                if user:
+                if user and getattr(user, 'pk', None) and User.objects.filter(pk=user.pk).exists():
                     from allauth.socialaccount.models import SocialAccount
                     from apps.users.signals import sync_google_profile_data
                     sa = SocialAccount.objects.filter(user=user, provider='google').first()
