@@ -1,0 +1,432 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Users,
+  Folder,
+  FolderPlus,
+  TrendingUp,
+  CheckCircle2,
+  ArrowRight,
+  LayoutDashboard,
+  Clock,
+  Settings,
+  Activity,
+  CheckSquare,
+  Sparkles,
+  Plus,
+  Crown,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import WorkspaceHomeMemberCard from "@/components/workspace/WorkspaceHomeMemberCard";
+import Loader from "@/components/Loader";
+import Header from "@/components/Header";
+import AddProjectModal from "@/components/workspace/projects/AddProjectModal";
+
+import { formatDate, timeAgo } from "@/lib/utils";
+import { useGetWorkspaceDashboard } from "@/lib/hooks/workspace.hook";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { ProjectType } from "@/lib/types/project.types";
+
+const WorkspaceDashboard = () => {
+  const { workspaceId, isAdminOrOwner, userRole } = useWorkspace();
+  const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  const router = useRouter();
+
+  const { data: dashboard, isLoading: dashboardLoading } =
+    useGetWorkspaceDashboard(workspaceId);
+
+  if (dashboardLoading) {
+    return <Loader variant="dots" title="Loading Workspace Overview..." />;
+  }
+
+  if (!dashboard) return null;
+
+  const totalTasks = dashboard.total_tasks || 0;
+  const completedTasks = dashboard.completed_tasks || 0;
+  const taskCompletionRate =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  return (
+    <div className="animate-in fade-in duration-300">
+      {/* --- UNIFIED HEADER WITH STATS CARDS --- */}
+      <Header
+        title={dashboard.workspace_name || "Workspace Overview"}
+        subtitle={
+          dashboard.workspace_description ||
+          "Track projects, team performance, and priority tasks in real time."
+        }
+        stats={[
+          {
+            title: "Active Projects",
+            value: dashboard.total_projects || 0,
+            icon: <Folder className="w-5 h-5 text-primary" />,
+          },
+          {
+            title: "Team Members",
+            value: dashboard.total_members || 0,
+            icon: <Users className="w-5 h-5 text-purple-500" />,
+          },
+          {
+            title: "Total Tasks",
+            value: dashboard.total_tasks || 0,
+            icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
+          },
+          {
+            title: "Completion Rate",
+            value: `${taskCompletionRate}%`,
+            icon: <TrendingUp className="w-5 h-5 text-amber-500" />,
+          },
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {isAdminOrOwner && (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddProjectModalOpen(true)}
+                  className="rounded-md gap-2 text-xs shadow-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Project
+                </Button>
+              </>
+            )}
+          </div>
+        }
+      />
+
+      {/* --- WORKSPACE BANNER CARD --- */}
+      <div className="bg-card rounded-2xl border border-border/60 shadow-xs p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-border/60 shadow-xs shrink-0 overflow-hidden">
+            <AvatarImage
+              src={dashboard.workspace_logo}
+              className="object-cover"
+            />
+            <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary/10 text-primary">
+              {dashboard.workspace_name?.[0]?.toUpperCase() || "WS"}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight">
+                {dashboard.workspace_name}
+              </h2>
+              <Badge variant="secondary" className="capitalize text-[11px]">
+                {userRole}
+              </Badge>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+              {dashboard.workspace_description ||
+                "Welcome to your workspace dashboard. Here is a summary of your team's workload and recent updates."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-auto md:w-auto justify-center md:justify-end border-t md:border-t-0 border-border/60 pt-4 md:pt-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/workspace/${workspaceId}/projects`)}
+            className="rounded-lg text-xs gap-1.5 w-full sm:w-auto"
+          >
+            <Folder className="w-3.5 h-3.5" />
+            All Projects
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/workspace/${workspaceId}/members`)}
+            className="rounded-lg text-xs gap-1.5 w-full sm:w-auto"
+          >
+            <Users className="w-3.5 h-3.5" />
+            Members
+          </Button>
+        </div>
+      </div>
+      <br />
+
+      {/* --- MAIN GRID LAYOUT --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+        {/* LEFT COLUMN (8 Cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* 1. MY PRIORITIES */}
+          {dashboard?.my_tasks?.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2">
+                  <CheckSquare className="w-5 h-5 text-primary" />
+                  My Priorities
+                </h2>
+                <Badge variant="outline" className="text-xs font-medium">
+                  {dashboard.my_tasks.length} Assigned
+                </Badge>
+              </div>
+
+              <div className="bg-card border border-border/60 rounded-2xl shadow-xs overflow-hidden divide-y divide-border/60">
+                {dashboard.my_tasks.slice(0, 5).map((task: any) => (
+                  <div
+                    key={task.id}
+                    onClick={() =>
+                      router.push(
+                        `/workspace/${workspaceId}/projects/${task.project_id}`,
+                      )
+                    }
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-muted/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                      <div
+                        className={`w-3 h-3 rounded-full shrink-0 ${
+                          task.priority === "high"
+                            ? "bg-red-500 shadow-xs"
+                            : task.priority === "medium"
+                              ? "bg-amber-500 shadow-xs"
+                              : "bg-blue-500 shadow-xs"
+                        }`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                          {task.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1 font-medium truncate">
+                            <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            {task.project_title}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                      <Badge
+                        variant="outline"
+                        className="text-[11px] capitalize font-medium px-2 py-0.5"
+                      >
+                        {task.priority || "normal"} priority
+                      </Badge>
+
+                      {task.due_date && (
+                        <span className="text-xs text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shrink-0">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          {formatDate(task.due_date)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 2. ACTIVE PROJECTS */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2">
+                <LayoutDashboard className="w-5 h-5 text-primary" />
+                Active Projects
+              </h2>
+              <Link
+                href={`/workspace/${workspaceId}/projects`}
+                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+              >
+                View All Projects <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Recent projects grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {dashboard?.active_projects?.map((project: ProjectType) => (
+                <div
+                  key={project.id}
+                  onClick={() =>
+                    router.push(
+                      `/workspace/${workspaceId}/projects/${project.id}`,
+                    )
+                  }
+                  className="bg-card border border-border/60 rounded-2xl p-5 hover:shadow-md hover:border-primary/40 transition-all cursor-pointer group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                        <Folder className="w-5 h-5" />
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs font-normal"
+                      >
+                        Active
+                      </Badge>
+                    </div>
+
+                    <h3 className="font-bold text-base mb-1 group-hover:text-primary transition-colors tracking-tight line-clamp-1">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Updated {formatDate(project.updated_at)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-medium text-muted-foreground">
+                        <span>Progress</span>
+                        <span>{dashboard.progress || 0}%</span>
+                      </div>
+                      <Progress
+                        value={dashboard.progress || 0}
+                        className="h-1.5 rounded-full"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-border/60">
+                      <div className="flex items-center -space-x-2 overflow-hidden">
+                        {project?.collaborators
+                          ?.slice(0, 3)
+                          .map((c: any, i: number) => (
+                            <div
+                              key={i}
+                              className="w-7 h-7 rounded-full border-2 border-card bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0"
+                            >
+                              {(c.user?.username ||
+                                c.user?.email ||
+                                "U")[0].toUpperCase()}
+                            </div>
+                          ))}
+                        {(project?.collaborators?.length || 0) > 3 && (
+                          <div className="w-7 h-7 rounded-full border-2 border-card bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-semibold shrink-0">
+                            +{project.collaborators.length - 3}
+                          </div>
+                        )}
+                      </div>
+
+                      <span className="text-xs font-medium text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                        Open <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {(!dashboard?.active_projects ||
+                dashboard.active_projects.length === 0) && (
+                <div className="col-span-full p-8 border border-dashed border-border/80 rounded-2xl text-center bg-muted/10 space-y-3">
+                  <Folder className="w-10 h-10 mx-auto text-muted-foreground/50" />
+                  <div>
+                    <p className="font-semibold text-sm">
+                      No active projects yet
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Create your first project to organize tasks and
+                      collaborate with team members.
+                    </p>
+                  </div>
+                  {isAdminOrOwner && (
+                    <Button
+                      onClick={() => setIsAddProjectModalOpen(true)}
+                      size="sm"
+                      className="rounded-xl gap-2 text-xs"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create Project
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN (4 Cols) */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* RECENT ACTIVITY WIDGET */}
+          <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-border/60 bg-muted/20 flex items-center justify-between">
+              <h3 className="font-bold text-sm flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                Recent Activity
+              </h3>
+            </div>
+            <div className="p-4 space-y-4">
+              {dashboard?.activities?.length > 0 ? (
+                dashboard.activities.slice(0, 5).map((activity: any) => (
+                  <div
+                    key={activity.id}
+                    className="flex gap-3 text-xs leading-relaxed"
+                  >
+                    <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-foreground">
+                        <span className="font-semibold">
+                          {activity.actor_name || "User"}
+                        </span>{" "}
+                        {activity.action_type}{" "}
+                        <span className="text-muted-foreground font-medium">
+                          {activity.target_text}
+                        </span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {timeAgo(activity.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No recent activity logged.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* TEAM MEMBERS WIDGET */}
+          <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-border/60 flex justify-between items-center bg-muted/20">
+              <h3 className="font-bold text-sm flex items-center gap-2">
+                <Users className="w-4 h-4 text-purple-500" />
+                Team Members
+              </h3>
+              <Link
+                href={`/workspace/${workspaceId}/members`}
+                className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
+              >
+                See All <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="p-4 space-y-3">
+              {dashboard.recent_members?.length > 0 ? (
+                dashboard.recent_members
+                  .slice(0, 4)
+                  .map((member: any) => (
+                    <WorkspaceHomeMemberCard member={member} key={member.id} />
+                  ))
+              ) : (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No workspace members found.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- ADD PROJECT MODAL --- */}
+      {isAdminOrOwner && (
+        <AddProjectModal
+          isOpen={isAddProjectModalOpen}
+          onClose={() => setIsAddProjectModalOpen(false)}
+          workspaceId={workspaceId}
+        />
+      )}
+    </div>
+  );
+};
+
+export default WorkspaceDashboard;
