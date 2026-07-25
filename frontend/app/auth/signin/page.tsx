@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Key, Mail, Shield } from "lucide-react";
+import { Key, Mail, Shield, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { handleLogin } from "@/lib/actions/auth.actions";
 import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/input/formInput";
 import { useSignin } from "@/lib/hooks/auth.hook";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { extractApiError } from "@/lib/utils/api-error";
 
 type FormValues = {
   email: string;
@@ -17,6 +18,7 @@ type FormValues = {
 export default function LoginPage() {
   const { mutateAsync: signin, isPending: loading } = useSignin();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     register,
@@ -26,6 +28,7 @@ export default function LoginPage() {
   } = useForm<FormValues>();
 
   const onSubmit = async (data: FormValues) => {
+    setApiError(null);
     try {
       const response = await signin({
         email: data.email,
@@ -34,27 +37,21 @@ export default function LoginPage() {
 
       if (response.access) {
         await handleLogin(response.user, response.access, response.refresh);
-        // Allow the cookie to set before redirecting
+        reset();
         setTimeout(() => {
-          window.location.href = "/";
-        }, 500);
+          window.location.href = "/profile";
+        }, 300);
       }
-    } finally {
-      reset();
+    } catch (error: any) {
+      const formattedErr = extractApiError(error);
+      setApiError(formattedErr);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    setGoogleLoading(true);
-    // Redirect to your Django Google Auth Endpoint
-    // Example: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/login/`;
-    console.log("Redirecting to Google...");
   };
 
   return (
     <div className="min-h-screen flex bg-background">
       <div className="w-full lg:w-[55%] flex flex-col justify-center px-4 sm:px-12 xl:px-24 py-8 sm:py-12">
-        <div className="max-w-[440px] w-full mx-auto border-0 sm:border sm:border-border p-0 sm:p-6 rounded-md bg-transparent sm:bg-card/30 shadow-none space-y-8">
+        <div className="max-w-[440px] w-full mx-auto border-0 sm:border sm:border-border p-0 sm:p-6 rounded-md bg-transparent sm:bg-card/30 shadow-none space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
@@ -84,6 +81,16 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Backend Error Display Alert */}
+          {apiError && (
+            <div className="p-3.5 rounded-lg bg-destructive/15 border border-destructive/30 text-destructive text-sm flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1 text-xs font-medium leading-relaxed">
+                {apiError}
+              </div>
+            </div>
+          )}
+
           {/* Main Card */}
           <div className="">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -95,6 +102,7 @@ export default function LoginPage() {
                 placeholder="name@example.com"
                 disabled={loading}
                 className="bg-background"
+                rules={{ required: "Email is required" }}
               />
 
               <div className="space-y-1">
@@ -107,8 +115,9 @@ export default function LoginPage() {
                   type="password"
                   disabled={loading}
                   className="bg-background"
+                  rules={{ required: "Password is required" }}
                 />
-                <div className="flex justify-end">
+                <div className="flex justify-end pt-1">
                   <Link
                     href="/auth/forgot-password"
                     className="text-xs text-muted-foreground hover:text-primary transition-colors"

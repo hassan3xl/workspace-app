@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 
 from apps.workspace.models import Workspace, Project, Task, ActivityLog, WorkspaceMember
+from api.serializers.project_serializers import ProjectSerializer
 from api.serializers.dashboard_serializers import (
     DashboardProjectSerializer,
     DashboardTaskSerializer,
     ActivityLogSerializer,
     DashboardMemberSerializer
 )
-
 
 
 # pyrefly: ignore [missing-import]
@@ -31,13 +31,22 @@ class WorkspaceDashboardView(APIView):
         workspace = get_object_or_404(Workspace, id=workspace_id)
 
         # 1. Verify Membership
-        if not WorkspaceMember.objects.filter(workspace=workspace, user=user).exists():
+        membership = WorkspaceMember.objects.filter(workspace=workspace, user=user).first()
+        if not membership:
             return Response({"error": "Access denied"}, status=403)
 
+        # Filter projects based on role & visibility
+        if membership.role in ['owner', 'admin']:
+            accessible_projects = Project.objects.filter(workspace=workspace)
+        else:
+            accessible_projects = Project.objects.filter(
+                workspace=workspace
+            ).filter(
+                Q(visibility='public') | Q(members__user=user)
+            ).distinct()
+
         # 2. Get Active Projects
-        # We annotate (calculate) task counts directly in the database
-        projects_queryset = Project.objects.filter(
-            workspace=workspace, 
+        projects_queryset = accessible_projects.filter(
             status__in=['active', 'planning']
         ).annotate(
             total_tasks=Count('tasks'),
@@ -46,7 +55,7 @@ class WorkspaceDashboardView(APIView):
 
         # 3. Get "My Priorities" (Tasks assigned to ME)
         my_tasks_queryset = Task.objects.filter(
-            project__workspace=workspace,
+            project__in=accessible_projects,
             assigned_to=user,
             status__in=['pending', 'in_progress']
         ).select_related('project').order_by('due_date', '-created_at')[:5]
@@ -67,9 +76,9 @@ class WorkspaceDashboardView(APIView):
             "workspace_logo": workspace.logo.url if workspace.logo else None,
             "workspace_description": workspace.description,
             "total_members": WorkspaceMember.objects.filter(workspace=workspace).count(),
-            "total_projects": Project.objects.filter(workspace=workspace).count(),
-            "total_tasks": Task.objects.filter(project__workspace=workspace).count(),
-            "active_projects": DashboardProjectSerializer(projects_queryset, many=True).data,
+            "total_projects": accessible_projects.count(),
+            "total_tasks": Task.objects.filter(project__in=accessible_projects).count(),
+            "active_projects": ProjectSerializer(projects_queryset, many=True, context={'request': request}).data,
             "my_tasks": DashboardTaskSerializer(my_tasks_queryset, many=True).data,
             "activities": ActivityLogSerializer(activity_queryset, many=True).data,
             "recent_members": DashboardMemberSerializer(members_queryset, many=True).data

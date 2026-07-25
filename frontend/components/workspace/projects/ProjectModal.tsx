@@ -247,8 +247,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                   {...register("visibility")}
                   className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors cursor-pointer"
                 >
-                  <option value="private">Private (Workspace Only)</option>
-                  <option value="public">Public</option>
+                  <option value="public">Public (All workspace members)</option>
+                  <option value="private">Private (Project members only)</option>
                 </select>
               </div>
             </div>

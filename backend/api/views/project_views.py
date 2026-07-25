@@ -255,7 +255,7 @@ class ProjectMemberView(generics.ListCreateAPIView):
 class StartTaskView(APIView):
     permission_classes = [
         IsAuthenticated, 
-        IsProjectCollaboratorOrWorkspaceAdmin
+        IsTaskCollaboratorOrProjectAdmin
     ]
 
 
@@ -278,20 +278,18 @@ class StartTaskView(APIView):
 class CompleteTaskView(APIView):
     permission_classes = [
         IsAuthenticated, 
-        IsProjectCollaboratorOrWorkspaceAdmin
+        IsTaskCollaboratorOrProjectAdmin
     ]
 
 
     def post(self, request, workspace_id, project_id, task_id):
         task = get_object_or_404(Task, id=task_id, project_id=project_id)
 
-        # Specific Logic: Only the person who started it can finish it? 
-        # (Or maybe Admins too? Adjust logic as needed)
         if task.status != 'in_progress':
              return Response({"detail": "Task is not in progress."}, status=status.HTTP_400_BAD_REQUEST)
              
-        if task.started_by != request.user:
-            # You might want to allow Project Admins to override this check
+        workspace_member = WorkspaceMember.objects.filter(workspace=task.project.workspace, user=request.user).first()
+        if task.started_by != request.user and getattr(workspace_member, 'role', None) not in ['owner', 'admin']:
             return Response({"detail": "You are not the user that started this task."}, status=status.HTTP_403_FORBIDDEN)
 
         # Service Call
@@ -305,7 +303,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthenticated, 
-        IsProjectCollaboratorOrWorkspaceAdmin
+        IsTaskCollaboratorOrProjectAdmin
     ]
     
     def get_queryset(self):

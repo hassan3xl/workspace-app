@@ -131,6 +131,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         source="created_by.profile.username", read_only=True
     )
     members = ProjectMemberSerializer(many=True, read_only=True)
+    collaborators = ProjectMemberSerializer(source='members', many=True, read_only=True)
     user_permission = serializers.SerializerMethodField()
 
     class Meta:
@@ -140,6 +141,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "status",
+            "visibility",
             "task_count",
             "completed_count",
             "created_by",
@@ -147,6 +149,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "updated_at",
             "user_permission",
             "members",
+            "collaborators",
             "tasks",
         ]
         read_only_fields = (
@@ -182,5 +185,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ["id", "title", "description", "visibility"]
+        fields = ["id", "title", "description", "status", "visibility"]
         read_only_fields = ("id", "created_at", "updated_at")
+

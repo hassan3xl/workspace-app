@@ -18,4 +18,9 @@ export const accountApi = {
     const res = await apiService.patch("/user/profile/avatar/", formData);
     return res;
   },
+  changePassword: async (data: any) => {
+    const res = await apiService.post("/auth/password/change/", data);
+    return res;
+  },
 };
+

@@ -21,6 +21,8 @@ import {
   Search,
   CheckSquare,
   Sparkles,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -227,38 +229,8 @@ const ProjectDetails = () => {
         }
         showBackButton
         onBack={() => router.push(`/workspace/${workspaceId}/projects`)}
-        stats={[
-          {
-            title: "Project Progress",
-            value: `${percentage}%`,
-            icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
-          },
-          {
-            title: "Total Tasks",
-            value: total,
-            icon: <ListTodo className="w-5 h-5 text-primary" />,
-          },
-          {
-            title: "In Progress",
-            value: inProgress,
-            icon: <PlayCircle className="w-5 h-5 text-blue-500" />,
-          },
-          {
-            title: "Team Members",
-            value: project.members?.length || 0,
-            icon: <Users className="w-5 h-5 text-purple-500" />,
-          },
-        ]}
-        actions={
+        actions={[
           <div className="flex items-center gap-2 flex-wrap">
-            {["admin", "owner", "member"].includes(userRole) && (
-              <Button
-                onClick={() => setProjectModalOpen(true)}
-                className="rounded-xl gap-2 text-xs shadow-xs"
-              >
-                <Plus className="w-4 h-4" /> Add Task
-              </Button>
-            )}
             {isAdminOrOwner && (
               <Button
                 variant="outline"
@@ -273,29 +245,51 @@ const ProjectDetails = () => {
                 <Settings2 className="w-4 h-4" /> Settings
               </Button>
             )}
-          </div>
-        }
+          </div>,
+        ]}
       />
 
       {/* --- PROJECT SUMMARY CARD WITH PROGRESS BAR & TEAM --- */}
       <div className="bg-card rounded-2xl border border-border/60 shadow-xs p-5 sm:p-6 space-y-6">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-6">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
           {/* Identity & Metadata */}
-          <div className="space-y-3 flex-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-                <Folder className="w-5 h-5" />
-              </div>
-              <h2 className="text-xl font-bold tracking-tight">
-                {project.title}
-              </h2>
+          <div className="space-y-4 flex-1 w-full">
+            {/* Badges Row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {project.visibility === "public" ? (
+                <Badge
+                  variant="outline"
+                  className="h-6 gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[11px] font-medium px-2.5"
+                >
+                  <Globe className="w-3 h-3" />
+                  Public (Workspace)
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="h-6 gap-1 bg-amber-500/10 text-amber-600 border-amber-500/20 text-[11px] font-medium px-2.5"
+                >
+                  <Lock className="w-3 h-3" />
+                  Private (Team Only)
+                </Badge>
+              )}
+
               <Badge
                 variant="outline"
-                className="h-6 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-[11px] font-medium"
+                className="h-6 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-[11px] font-medium px-2.5"
               >
                 <Shield className="w-3 h-3" />
-                {project?.user_permission?.permission || "Member"}
+                {canEdit ? "Write Permission" : "Read-Only Permission"}
               </Badge>
+
+              {project.status && (
+                <Badge
+                  variant="secondary"
+                  className="h-6 capitalize text-[11px] font-medium px-2.5"
+                >
+                  {project.status.replace("_", " ")}
+                </Badge>
+              )}
             </div>
 
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-3xl">
@@ -310,38 +304,50 @@ const ProjectDetails = () => {
               <span>•</span>
               <span className="flex items-center gap-1.5 font-medium">
                 <Users className="w-4 h-4 text-purple-500" />
-                {project.members?.length || 0} Collaborators
+                {project.members?.length || project.collaborators?.length || 0} Collaborators
               </span>
             </div>
           </div>
 
           {/* Team Avatars & Progress Block */}
-          <div className="w-full md:w-72 bg-muted/30 p-4 rounded-xl border border-border/50 space-y-3 shrink-0">
-            <div className="flex justify-between items-center text-xs font-semibold">
-              <span className="text-muted-foreground">Overall Completion</span>
-              <span className="text-foreground">{percentage}%</span>
+          <div className="w-full lg:w-80 bg-muted/20 p-5 rounded-2xl border border-border/60 space-y-4 shrink-0">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs font-semibold">
+                <span className="text-muted-foreground">Overall Completion</span>
+                <span className="text-primary font-bold">{percentage}%</span>
+              </div>
+              <Progress value={percentage} className="h-2 rounded-full" />
+              <div className="flex justify-between items-center text-[11px] text-muted-foreground pt-0.5">
+                <span>{completed} completed</span>
+                <span>{total} total tasks</span>
+              </div>
             </div>
-            <Progress value={percentage} className="h-2 rounded-full" />
 
-            <div className="pt-2 border-t border-border/50 flex items-center justify-between">
+            <div className="pt-3 border-t border-border/50 flex items-center justify-between">
               <span className="text-xs text-muted-foreground font-medium">
-                Team
+                Project Team
               </span>
               <div className="flex items-center -space-x-2">
-                {project.members?.slice(0, 4).map((member: any) => (
-                  <Avatar
-                    key={member.user.id}
-                    className="w-7 h-7 border-2 border-background ring-1 ring-border shrink-0"
-                  >
-                    <AvatarImage src={member.user.avatar} />
-                    <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
-                      {member.user?.username?.[0]?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {(project.members?.length || 0) > 4 && (
+                {(project.members || project.collaborators || [])
+                  .slice(0, 4)
+                  .map((member: any, i: number) => {
+                    const u = member.user || member;
+                    const name = u?.username || u?.email || "U";
+                    return (
+                      <Avatar
+                        key={member.id || u.id || i}
+                        className="w-7 h-7 border-2 border-background ring-1 ring-border shrink-0"
+                      >
+                        <AvatarImage src={u.avatar} alt={name} />
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+                          {name[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    );
+                  })}
+                {((project.members || project.collaborators || []).length || 0) > 4 && (
                   <div className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-semibold border-2 border-background">
-                    +{project.members.length - 4}
+                    +{(project.members || project.collaborators || []).length - 4}
                   </div>
                 )}
               </div>
@@ -354,14 +360,25 @@ const ProjectDetails = () => {
       <div className="space-y-5">
         {/* Section Header & Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-              <CheckSquare className="w-5 h-5 text-primary" />
-              Project Tasks
-            </h2>
-            <Badge variant="outline" className="text-xs">
-              {filteredTasks.length}
-            </Badge>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                <CheckSquare className="w-5 h-5 text-primary" />
+                Project Tasks
+              </h2>
+              <Badge variant="outline" className="text-xs">
+                {filteredTasks.length}
+              </Badge>
+            </div>
+            {["admin", "owner", "member"].includes(userRole) && (
+              <Button
+                onClick={() => setProjectModalOpen(true)}
+                size="sm"
+                className="rounded-xl gap-1.5 text-xs shadow-xs h-8 px-3"
+              >
+                <Plus className="w-4 h-4" /> Add Task
+              </Button>
+            )}
           </div>
 
           {/* Filter Controls */}

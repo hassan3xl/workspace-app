@@ -64,3 +64,13 @@ export const useUploaadAvatar = () => {
     },
   });
 };
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: (data: any) => accountApi.changePassword(data),
+    onSuccess: () => {
+      toast.success("Password changed successfully!");
+    },
+  });
+};
+

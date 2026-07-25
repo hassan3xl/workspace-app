@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from ..models import WorkspaceMember, ProjectMember, Workspace
+from ..models import WorkspaceMember, ProjectMember, Workspace, Project
 
 class IsWorkspaceMemberOrAdmin(permissions.BasePermission):
     """
@@ -54,32 +54,27 @@ class IsProjectCollaboratorOrWorkspaceAdmin(permissions.BasePermission):
     """
     Handles permissions for Project interactions nested inside a Workspace.
     - Prerequisite: Must be a Workspace Member.
-    - READ (GET): Must be a Project Member OR Workspace Admin/Owner.
-    - WRITE (PUT, DELETE PROJECT): Must be Workspace Admin/Owner (as requested).
+    - Public Projects: All workspace members can see and interact.
+    - Private Projects: Only Workspace Admins/Owners and explicit Project Members can see and interact.
     """
 
     def has_permission(self, request, view):
-        # 1. Check Workspace Membership "Gatekeeper"
         if not request.user.is_authenticated:
             return False
 
         workspace_id = view.kwargs.get('workspace_id')
-        
         if workspace_id:
             is_workspace_member = WorkspaceMember.objects.filter(
                 workspace_id=workspace_id, 
                 user=request.user
             ).exists()
-            
             if not is_workspace_member:
                 return False
-                
+
         return True
 
     def has_object_permission(self, request, view, obj):
         # 'obj' here is the PROJECT instance
-        
-        # Fetch the user's role in the PARENT workspace
         workspace_membership = WorkspaceMember.objects.filter(
             workspace=obj.workspace,
             user=request.user
@@ -89,50 +84,69 @@ class IsProjectCollaboratorOrWorkspaceAdmin(permissions.BasePermission):
             return False
 
         # 1. ADMIN/OWNER OVERRIDE
-        # If user is Workspace Admin/Owner, they can do ANYTHING to the project
         if workspace_membership.role in ['admin', 'owner']:
             return True
 
-        # 2. WRITE Access (Update/Delete Project)
-        # As per your request: only Admins/Owners can update/delete projects.
-        # Regular members are denied here.
-        if request.method not in permissions.SAFE_METHODS:
-            return False
-
-        # 3. READ Access (Viewing the project)
-        # Check if they are explicitly added to the project
+        # 2. Check Project Membership
         is_project_collaborator = ProjectMember.objects.filter(
             project=obj,
             user=request.user
         ).exists()
 
-        # Allow access if they are a collaborator OR if the project is visible to the whole workspace
-        if is_project_collaborator:
-            return True
-            
-        if obj.visibility == 'public':
+        # 3. If Private Project -> Only project members (or admins/owners handled above)
+        if obj.visibility == 'private' and not is_project_collaborator:
+            return False
+
+        # 4. Safe Methods (GET, HEAD, OPTIONS) -> Allowed if public or collaborator
+        if request.method in permissions.SAFE_METHODS:
             return True
 
+        # 5. Unsafe Methods (PUT, PATCH, DELETE) -> Creator or project members with write permission
+        if is_project_collaborator:
+            pm = ProjectMember.objects.filter(project=obj, user=request.user).first()
+            if pm and pm.permission == 'write':
+                return True
+
         return False
+
 
 class IsTaskCollaboratorOrProjectAdmin(permissions.BasePermission):
     """
     Handles permissions for Task interactions nested inside a Project.
     
-    Hierarchy:
-    1. Workspace Admin/Owner: Full Access (Super override).
-    2. Project Member:
-       - READ (GET): Allowed if user is a member of the project.
-       - WRITE (PUT, PATCH, DELETE): Allowed ONLY if project membership has 'write' permission.
+    Rules:
+    - Prerequisite: Must be a Workspace Member.
+    - If Project is PUBLIC: All workspace members can see and interact (view, create, start, complete tasks).
+    - If Project is PRIVATE: Only Workspace Admins/Owners or explicit Project Members can see and interact.
     """
 
     def has_permission(self, request, view):
-        # 1. Global Auth Check
         if not request.user.is_authenticated:
             return False
             
-        # (Optional) fail-fast logic if project_id is in URL
-        # We rely on has_object_permission for the specific logic
+        workspace_id = view.kwargs.get('workspace_id')
+        project_id = view.kwargs.get('project_id')
+        user = request.user
+
+        if workspace_id:
+            workspace_member = WorkspaceMember.objects.filter(
+                workspace_id=workspace_id,
+                user=user
+            ).first()
+            if not workspace_member:
+                return False
+
+            if project_id:
+                try:
+                    project = Project.objects.get(id=project_id, workspace_id=workspace_id)
+                    if workspace_member.role in ['admin', 'owner']:
+                        return True
+                    if project.visibility == 'public':
+                        return True
+                    return ProjectMember.objects.filter(project=project, user=user).exists()
+                except Project.DoesNotExist:
+                    return False
+
         return True
 
     def has_object_permission(self, request, view, obj):
@@ -140,7 +154,7 @@ class IsTaskCollaboratorOrProjectAdmin(permissions.BasePermission):
         project = obj.project
         workspace = project.workspace
 
-        # 1. Fetch Workspace Membership (The absolute prerequisite)
+        # 1. Workspace Membership check
         workspace_member = WorkspaceMember.objects.filter(
             workspace=workspace,
             user=request.user
@@ -149,30 +163,21 @@ class IsTaskCollaboratorOrProjectAdmin(permissions.BasePermission):
         if not workspace_member:
             return False
 
-        # 2. ADMIN/OWNER OVERRIDE (Workspace Level)
-        # If user is Workspace Admin/Owner, they have full control over tasks.
+        # 2. ADMIN/OWNER OVERRIDE
         if workspace_member.role in ['admin', 'owner']:
             return True
 
-        # 3. Check Project Membership
-        # User must be explicitly added to the project to interact with tasks
-        project_member = ProjectMember.objects.filter(
+        # 3. Check Project Membership & Visibility
+        is_project_member = ProjectMember.objects.filter(
             project=project,
             user=request.user
-        ).first()
+        ).exists()
 
-        if not project_member:
+        if project.visibility == 'private' and not is_project_member:
             return False
 
-        # 4. READ Access (Safe Methods: GET, HEAD, OPTIONS)
-        # If they are a project member (any role), they can view the task.
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # 5. WRITE Access (Unsafe Methods: PUT, PATCH, DELETE)
-        # Check if the project member specifically has 'write' permission.
-        # NOTE: Adjust 'permission' to whatever field name you use (e.g., 'role', 'access_level')
-        return project_member.permission == 'write'
+        # If project is public OR user is project member -> can see and interact!
+        return True
 
 
 class IsCommentVisibleToUser(permissions.BasePermission):
@@ -180,7 +185,7 @@ class IsCommentVisibleToUser(permissions.BasePermission):
     Handles permissions for Comment interactions.
     """
     def has_permission(self, request, view):
-         return request.user.is_authenticated
+        return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         # obj is Comment
@@ -188,22 +193,23 @@ class IsCommentVisibleToUser(permissions.BasePermission):
         project = task.project
         workspace = project.workspace
 
-        # 1. Workspace Admin/Owner Override
         workspace_member = WorkspaceMember.objects.filter(
             workspace=workspace,
             user=request.user
         ).first()
 
-        if workspace_member and workspace_member.role in ['admin', 'owner']:
+        if not workspace_member:
+            return False
+
+        if workspace_member.role in ['admin', 'owner']:
             return True
 
-        # 2. Project Member Check
         is_project_member = ProjectMember.objects.filter(
             project=project,
             user=request.user
         ).exists()
         
-        if not is_project_member:
-            return False
+        if project.visibility == 'public' or is_project_member:
+            return True
 
-        return True
+        return False

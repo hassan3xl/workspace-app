@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Mail, Shield, AlertCircle, Check } from "lucide-react";
+import { Lock, Mail, Shield, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,9 +10,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { handleLogin } from "@/lib/actions/auth.actions";
 import { FormInput } from "@/components/input/formInput";
-import { GoogleIcon } from "../signin/page";
 import { useSignup } from "@/lib/hooks/auth.hook";
+import { authApi } from "@/lib/api/auth.api";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { extractApiError } from "@/lib/utils/api-error";
+
 // Password Validation Regex
 // Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
 const PASSWORD_REGEX =
@@ -37,12 +39,14 @@ const SignupPage = () => {
   const router = useRouter();
   const password1Val = watch("password1");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const { mutateAsync: signupHook, isPending: loading } = useSignup();
 
   const onSubmit = async (data: SignupForm) => {
+    setApiError(null);
     if (!data.agreeToTerms) {
-      toast.info("Please agree to the Terms of Service.");
+      setApiError("Please agree to the Terms of Service to create an account.");
       return;
     }
 
@@ -53,14 +57,36 @@ const SignupPage = () => {
         password2: data.password2,
       });
 
-      if (response.access) {
-        await handleLogin(response.user, response.access, response.refresh);
-        reset();
+      let access = response?.access;
+      let refresh = response?.refresh;
+      let user = response?.user;
 
-        router.push("/profile");
+      // Fallback: If registration response didn't contain access token directly,
+      // perform automatic login using user's credentials
+      if (!access) {
+        const loginRes = await authApi.signIn({
+          email: data.email,
+          password: data.password1,
+        });
+        access = loginRes?.access;
+        refresh = loginRes?.refresh;
+        user = loginRes?.user;
+      }
+
+      if (access) {
+        await handleLogin(user, access, refresh);
+        reset();
+        toast.success("Account created! Redirecting to your profile...");
+        setTimeout(() => {
+          window.location.href = "/profile";
+        }, 300);
+      } else {
+        toast.success("Account created successfully! Please sign in.");
+        router.push("/auth/signin");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      const formattedErr = extractApiError(error);
+      setApiError(formattedErr);
     }
   };
 
@@ -68,7 +94,7 @@ const SignupPage = () => {
     <div className="min-h-screen flex bg-background">
       {/* Left: Form Section */}
       <div className="w-full lg:w-[55%] flex flex-col justify-center px-4 sm:px-12 xl:px-24 py-8 sm:py-12">
-        <div className="max-w-[440px] w-full mx-auto border-0 sm:border sm:border-border p-0 sm:p-6 rounded-md bg-transparent sm:bg-card/30 shadow-none space-y-8">
+        <div className="max-w-[440px] w-full mx-auto border-0 sm:border sm:border-border p-0 sm:p-6 rounded-md bg-transparent sm:bg-card/30 shadow-none space-y-6">
           <div className="space-y-2 items-center text-center">
             <h1 className="text-3xl font-bold tracking-tight">
               Create an account
@@ -97,6 +123,16 @@ const SignupPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Backend Error Display Alert */}
+          {apiError && (
+            <div className="p-3.5 rounded-lg bg-destructive/15 border border-destructive/30 text-destructive text-sm flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1 text-xs font-medium leading-relaxed">
+                {apiError}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <FormInput
@@ -236,3 +272,4 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
+

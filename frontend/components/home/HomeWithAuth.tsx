@@ -21,19 +21,13 @@ const HomeWithAuth = ({ user }: { user: any }) => {
       <Header
         title={`${timeOfDay}, ${userName}`}
         subtitle="Here's what's happening across your workspaces today."
-        stats={[
-          {
-            title: "Active Workspaces",
-            value: workspaces?.length || 0,
-          },
-        ]}
       />
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* LEFT COLUMN: Main Content (Fluid Width) */}
         <div className="flex-1 w-full min-w-0 space-y-8">
-          <div className="border border-border rounded-xl p-4 row-end-4 md:p-6 bg-card/50">
-            <div className="flex items-center justify-between mb-6">
+          <div className="border-t border-border row-end-4">
+            <div className="flex items-center justify-between my-6">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Layout className="w-5 h-5 text-primary" />
                 Recent Workspaces

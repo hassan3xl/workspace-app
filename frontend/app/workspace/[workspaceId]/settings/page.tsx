@@ -236,7 +236,7 @@ const WorkspaceSettingsPage = () => {
   const activeInvitesList = Array.isArray(pendingInvites) ? pendingInvites : [];
 
   return (
-    <div className="pb-12">
+    <div className="space-y-6 pb-12">
       {/* --- REUSABLE HEADER WITH BACK BUTTON & VISIBILITY BADGE --- */}
       <Header
         title={workspace.name}

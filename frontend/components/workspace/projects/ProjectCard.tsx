@@ -42,9 +42,10 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
   };
 
   // Calculations
+  const totalTasks = project.tasks?.length || 0;
   const completionPercentage =
-    project.tasks.length > 0
-      ? Math.round((project.completed_count / project.tasks.length) * 100)
+    totalTasks > 0
+      ? Math.round(((project.completed_count || 0) / totalTasks) * 100)
       : 0;
 
   // Visual Helpers
@@ -128,22 +129,39 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
       <div className="flex items-center justify-between pt-4 border-t border-border/50">
         {/* Collaborators Stack */}
         <div className="flex items-center -space-x-2">
-          {project.members?.slice(0, 3).map((collab, i) => (
-            <Avatar
-              key={collab.id || i}
-              className="w-7 h-7 border-2 border-card ring-1 ring-border"
-            >
-              <AvatarImage src={collab.user?.avatar} />
-              <AvatarFallback className="text-[9px] bg-secondary font-bold">
-                {collab.user?.username?.[0]?.toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-          {(project.members?.length || 0) > 3 && (
-            <div className="w-7 h-7 rounded-full bg-secondary border-2 border-card flex items-center justify-center text-[9px] font-bold text-muted-foreground">
-              +{project.members.length - 3}
-            </div>
-          )}
+          {(() => {
+            const membersList = project.members?.length
+              ? project.members
+              : project.collaborators || [];
+            
+            return (
+              <>
+                {membersList.slice(0, 3).map((collab: any, i: number) => {
+                  const userObj = collab?.user || collab;
+                  const name = userObj?.username || userObj?.email || "U";
+                  const initial = name[0]?.toUpperCase() || "U";
+                  const avatarUrl = userObj?.avatar;
+
+                  return (
+                    <Avatar
+                      key={collab?.id || i}
+                      className="w-7 h-7 border-2 border-card ring-1 ring-border"
+                    >
+                      <AvatarImage src={avatarUrl} alt={name} />
+                      <AvatarFallback className="text-[9px] bg-primary/10 text-primary font-bold">
+                        {initial}
+                      </AvatarFallback>
+                    </Avatar>
+                  );
+                })}
+                {membersList.length > 3 && (
+                  <div className="w-7 h-7 rounded-full bg-secondary border-2 border-card flex items-center justify-center text-[9px] font-bold text-muted-foreground">
+                    +{membersList.length - 3}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Task Stat */}
@@ -151,7 +169,7 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
           <div className="flex items-center gap-1 bg-secondary/40 px-2 py-1 rounded-md">
             <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
             <span>
-              {project.completed_count}/{project.tasks.length}
+              {project.completed_count || 0}/{project.tasks?.length || 0}
             </span>
           </div>
         </div>
