@@ -55,12 +55,12 @@ const WorkspaceDashboard = () => {
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="">
       {/* --- UNIFIED HEADER WITH STATS CARDS --- */}
 
-      <div className="bg-card rounded-2xl border border-border/60 shadow-xs p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+      <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-border/60 shadow-xs shrink-0 overflow-hidden">
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-border shadow-xs shrink-0 overflow-hidden">
             <AvatarImage
               src={dashboard.workspace_logo}
               className="object-cover"
