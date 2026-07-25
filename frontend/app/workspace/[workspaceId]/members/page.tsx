@@ -58,7 +58,7 @@ const WorkspaceMembers = () => {
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* 1. UNIFIED HEADER WITH BACK BUTTON */}
       <Header
-        title="Workspace Members"
+        title="Members"
         subtitle="Manage member permissions, view member profiles, and collaborate across teams."
         showBackButton
         onBack={() => router.push(`/workspace/${workspaceId}`)}
@@ -90,7 +90,8 @@ const WorkspaceMembers = () => {
               onClick={() => router.push(`/workspace/${workspaceId}/settings`)}
               className="rounded-xl gap-2 text-xs shadow-xs"
             >
-              <UserPlus className="w-4 h-4" /> Invite Members
+              <UserPlus className="w-4 h-4" />{" "}
+              <p className="hidden md:block">Invite Members</p>
             </Button>
           )
         }

@@ -25,26 +25,11 @@ interface HeaderProps {
 const StatCard = ({ title, value, icon, trend }: StatCardData) => {
   return (
     <div className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md hover:border-ring transition-all">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold text-foreground">{value}</h3>
-
-          <p className="text-sm font-medium text-primary mb-1">{title}</p>
-          {trend && (
-            <p
-              className={`text-sm mt-2 flex items-center gap-1 ${
-                trend.isPositive
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-              }`}
-            >
-              <span>{trend.isPositive ? "↑" : "↓"}</span>
-              {trend.value}
-            </p>
-          )}
-        </div>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h3 className="text-2xl font-bold text-foreground">{value}</h3>
         <div className="bg-muted p-3 rounded-lg text-foreground">{icon}</div>
       </div>
+      <p className="text-sm font-medium text-primary mb-1">{title}</p>
     </div>
   );
 };
@@ -85,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
             </Button>
           )}
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
               {title}
             </h1>
             {subtitle && (

@@ -50,14 +50,35 @@ export default function AccountPage() {
 
   if (isProfileLoading) {
     return (
-      <div className="w-full min-w-0 space-y-4 py-4 animate-pulse">
-        <Skeleton className="h-32 sm:h-44 w-full rounded-2xl" />
-        <div className="flex gap-2 overflow-hidden">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-lg shrink-0" />
-          ))}
+      <div className="w-full min-w-0 space-y-5 pb-8 animate-in fade-in duration-300">
+        {/* Profile Header Skeleton */}
+        <div className="w-full p-4 sm:p-6 rounded-2xl border border-border/50 bg-card space-y-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+            <Skeleton className="h-20 w-20 sm:h-24 sm:w-24 rounded-full shrink-0" />
+            <div className="space-y-2 flex-1 w-full flex flex-col items-center sm:items-start">
+              <Skeleton className="h-6 w-40 max-w-full rounded-md" />
+              <Skeleton className="h-4 w-56 max-w-full rounded-md" />
+              <div className="flex gap-2 pt-1">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </div>
+            </div>
+          </div>
         </div>
-        <Skeleton className="h-64 w-full rounded-xl" />
+
+        {/* Navigation & Content Skeleton */}
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 w-full min-w-0">
+          <div className="w-full lg:w-56 shrink-0">
+            <div className="flex lg:flex-col gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24 lg:w-full rounded-lg shrink-0" />
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 w-full space-y-4">
+            <Skeleton className="h-48 sm:h-64 w-full rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }

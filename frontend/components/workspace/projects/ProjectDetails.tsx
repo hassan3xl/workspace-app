@@ -242,7 +242,8 @@ const ProjectDetails = () => {
                 }
                 className="rounded-xl gap-2 text-xs border-border/60"
               >
-                <Settings2 className="w-4 h-4" /> Settings
+                <Settings2 className="w-4 h-4" />{" "}
+                <p className="hidden md:block">Settings</p>
               </Button>
             )}
           </div>,
@@ -304,7 +305,10 @@ const ProjectDetails = () => {
               <span>•</span>
               <span className="flex items-center gap-1.5 font-medium">
                 <Users className="w-4 h-4 text-purple-500" />
-                {project.members?.length || project.collaborators?.length || 0} Collaborators
+                {project.members?.length ||
+                  project.collaborators?.length ||
+                  0}{" "}
+                Collaborators
               </span>
             </div>
           </div>
@@ -313,7 +317,9 @@ const ProjectDetails = () => {
           <div className="w-full lg:w-80 bg-muted/20 p-5 rounded-2xl border border-border/60 space-y-4 shrink-0">
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-muted-foreground">Overall Completion</span>
+                <span className="text-muted-foreground">
+                  Overall Completion
+                </span>
                 <span className="text-primary font-bold">{percentage}%</span>
               </div>
               <Progress value={percentage} className="h-2 rounded-full" />
@@ -345,9 +351,12 @@ const ProjectDetails = () => {
                       </Avatar>
                     );
                   })}
-                {((project.members || project.collaborators || []).length || 0) > 4 && (
+                {((project.members || project.collaborators || []).length ||
+                  0) > 4 && (
                   <div className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-semibold border-2 border-background">
-                    +{(project.members || project.collaborators || []).length - 4}
+                    +
+                    {(project.members || project.collaborators || []).length -
+                      4}
                   </div>
                 )}
               </div>

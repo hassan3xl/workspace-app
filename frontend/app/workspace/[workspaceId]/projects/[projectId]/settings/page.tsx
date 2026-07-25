@@ -159,8 +159,7 @@ const ProjectSettingsPage = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* --- UNIFIED HEADER COMPONENT WITH BACK BUTTON --- */}
+    <div className="space-y-6">
       <Header
         title="Project Settings"
         subtitle={`Configure project details, collaborators, permissions, and lifecycle status.`}
@@ -168,55 +167,35 @@ const ProjectSettingsPage = () => {
         onBack={() =>
           router.push(`/workspace/${workspaceId}/projects/${projectId}`)
         }
-        actions={
-          <Badge
-            variant="outline"
-            className={cn(
-              "px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full border shadow-xs",
-              project.status === "active" &&
-                "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
-              project.status === "planning" &&
-                "bg-blue-500/10 text-blue-500 border-blue-500/30",
-              project.status === "on_hold" &&
-                "bg-amber-500/10 text-amber-500 border-amber-500/30",
-              project.status === "completed" &&
-                "bg-purple-500/10 text-purple-500 border-purple-500/30",
-              project.status === "archived" &&
-                "bg-destructive/10 text-destructive border-destructive/30",
-            )}
-          >
-            ● {project.status.replace("_", " ")}
-          </Badge>
-        }
       />
 
-      {/* --- NAVIGATION TABS (Mobile Scrollable Segment Control) --- */}
-      <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl overflow-x-auto scrollbar-none max-w-full border border-border/40 touch-pan-x">
+      {/* --- NAVIGATION TABS (Mobile-Responsive Segmented Control) --- */}
+      <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-xl border border-border/40 w-full min-w-0">
         <button
           onClick={() => setActiveTab("general")}
           className={cn(
-            "flex-1 min-w-[120px] sm:min-w-0 flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+            "flex items-center justify-center gap-1.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all min-w-0",
             activeTab === "general"
               ? "bg-card text-foreground shadow-xs font-semibold"
               : "text-muted-foreground hover:text-foreground hover:bg-card/50",
           )}
         >
           <Folder className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          General Details
+          <span className="truncate">Details</span>
         </button>
 
         <button
           onClick={() => setActiveTab("team")}
           className={cn(
-            "flex-1 min-w-[140px] sm:min-w-0 flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+            "flex items-center justify-center gap-1.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all min-w-0",
             activeTab === "team"
               ? "bg-card text-foreground shadow-xs font-semibold"
               : "text-muted-foreground hover:text-foreground hover:bg-card/50",
           )}
         >
           <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          Collaborators
-          <Badge className="ml-1 h-4 sm:h-5 bg-muted text-muted-foreground border-border text-[10px] px-1.5">
+          <span className="truncate">Team</span>
+          <Badge className="ml-0.5 sm:ml-1 h-4 sm:h-5 bg-muted text-muted-foreground border-border text-[10px] px-1 sm:px-1.5 shrink-0">
             {project.members?.length || 0}
           </Badge>
         </button>
@@ -224,14 +203,14 @@ const ProjectSettingsPage = () => {
         <button
           onClick={() => setActiveTab("danger")}
           className={cn(
-            "flex-1 min-w-[120px] sm:min-w-0 flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+            "flex items-center justify-center gap-1.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all min-w-0",
             activeTab === "danger"
               ? "bg-destructive/10 text-destructive shadow-xs font-semibold"
               : "text-muted-foreground hover:text-destructive hover:bg-destructive/5",
           )}
         >
           <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          Danger Zone
+          <span className="truncate">Danger</span>
         </button>
       </div>
 
@@ -243,7 +222,7 @@ const ProjectSettingsPage = () => {
               <h2 className="text-base sm:text-lg font-semibold tracking-tight">
                 General Project Settings
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Update basic details such as title, description, visibility, and
                 current project lifecycle status.
               </p>
@@ -310,14 +289,14 @@ const ProjectSettingsPage = () => {
 
               {/* Created Info */}
               <div className="p-3 rounded-lg bg-muted/40 border border-border/40 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-muted-foreground gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <Calendar className="w-3.5 h-3.5 shrink-0" />
-                  <span>Created {formatDate(project.created_at)}</span>
+                  <span className="truncate">Created {formatDate(project.created_at)}</span>
                 </div>
                 {project.created_by && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <User className="w-3.5 h-3.5 shrink-0" />
-                    <span>Owner: {project.created_by}</span>
+                    <span className="truncate">Owner: {project.created_by}</span>
                   </div>
                 )}
               </div>
@@ -340,7 +319,7 @@ const ProjectSettingsPage = () => {
                   type="submit"
                   size="sm"
                   disabled={updating}
-                  className="w-full sm:w-auto h-10 sm:h-9"
+                  className="w-full sm:w-auto h-10 sm:h-9 font-medium"
                 >
                   {updating ? "Saving..." : "Save Settings"}
                 </Button>
@@ -354,7 +333,7 @@ const ProjectSettingsPage = () => {
       {activeTab === "team" && (
         <div className="space-y-6">
           <div className="bg-card rounded-xl border border-border/60 shadow-xs overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-border/50 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-muted/20">
+            <div className="p-4 sm:p-6 border-b border-border/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-muted/20">
               <div>
                 <h2 className="text-base sm:text-lg font-semibold tracking-tight flex items-center gap-2">
                   <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
@@ -369,7 +348,7 @@ const ProjectSettingsPage = () => {
               <Button
                 size="sm"
                 onClick={() => setShowAddCollaboratorModal(true)}
-                className="w-full sm:w-auto h-10 sm:h-9 shadow-xs"
+                className="w-full sm:w-auto h-10 sm:h-9 shadow-xs shrink-0"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add Collaborator
@@ -392,9 +371,9 @@ const ProjectSettingsPage = () => {
                 project.members.map((collab: any) => (
                   <div
                     key={collab.id}
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 hover:bg-muted/30 transition-colors"
+                    className="p-3.5 sm:p-5 flex items-center justify-between gap-3 hover:bg-muted/30 transition-colors"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border border-border shadow-xs shrink-0">
                         <AvatarImage src={collab?.user?.avatar} />
                         <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
@@ -404,14 +383,14 @@ const ProjectSettingsPage = () => {
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm text-foreground truncate">
+                      <div className="min-w-0 space-y-0.5 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-xs sm:text-sm text-foreground truncate">
                             {collab?.user?.username || "Workspace Member"}
                           </p>
                           <Badge
                             variant="outline"
-                            className="text-[10px] h-4 px-1.5 uppercase font-mono tracking-wider"
+                            className="text-[10px] h-4 px-1.5 uppercase font-mono tracking-wider shrink-0"
                           >
                             {collab?.permission || "READ"}
                           </Badge>
@@ -422,29 +401,27 @@ const ProjectSettingsPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto h-9 justify-center"
-                        title="Remove Collaborator"
-                        onClick={() =>
-                          setCollaboratorToDelete({
-                            isOpen: true,
-                            collabId: collab.id,
-                            userName:
-                              collab?.user?.username ||
-                              collab?.user?.email ||
-                              "Member",
-                          })
-                        }
-                      >
-                        <Trash2 className="w-4 h-4 mr-1.5 sm:mr-0" />
-                        <span className="sm:hidden text-xs">
-                          Remove Collaborator
-                        </span>
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8 sm:h-9 sm:w-auto p-0 sm:px-3 shrink-0"
+                      title="Remove Collaborator"
+                      onClick={() =>
+                        setCollaboratorToDelete({
+                          isOpen: true,
+                          collabId: collab.id,
+                          userName:
+                            collab?.user?.username ||
+                            collab?.user?.email ||
+                            "Member",
+                        })
+                      }
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive sm:text-muted-foreground" />
+                      <span className="hidden sm:inline text-xs ml-1.5">
+                        Remove
+                      </span>
+                    </Button>
                   </div>
                 ))
               )}

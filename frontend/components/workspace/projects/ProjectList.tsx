@@ -78,16 +78,6 @@ const ProjectList = () => {
             icon: <TrendingUp className="w-5 h-5 text-purple-500" />,
           },
         ]}
-        actions={
-          isAdminOrOwner && (
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              className="rounded-xl gap-2 text-xs shadow-xs"
-            >
-              <Plus className="w-4 h-4" /> New Project
-            </Button>
-          )
-        }
       />
 
       {/* 2. Controls & Grid */}

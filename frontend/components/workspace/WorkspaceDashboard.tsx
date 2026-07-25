@@ -106,7 +106,7 @@ const WorkspaceDashboard = () => {
             icon: <Folder className="w-5 h-5 text-primary" />,
           },
           {
-            title: "Team Members",
+            title: "Members",
             value: dashboard.total_members || 0,
             icon: <Users className="w-5 h-5 text-purple-500" />,
           },
