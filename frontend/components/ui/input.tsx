@@ -79,6 +79,209 @@ export const SwitchComponent = ({
   );
 };
 
+export const CustomSelect = React.forwardRef<
+  HTMLSelectElement,
+  {
+    id?: string;
+    name?: string;
+    disabled?: boolean;
+    value?: any;
+    onChange?: (e: any) => void;
+    options: InputOption[];
+    placeholder?: string;
+    leftIcon?: React.ReactNode;
+    rightIcon?: React.ReactNode;
+    baseInputStyles: string;
+    className?: string;
+    [key: string]: any;
+  }
+>(
+  (
+    {
+      id,
+      name,
+      disabled,
+      value,
+      onChange,
+      options = [],
+      placeholder,
+      leftIcon,
+      rightIcon,
+      baseInputStyles,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+    const internalSelectRef = React.useRef<HTMLSelectElement | null>(null);
+
+    const setSelectRef = React.useCallback(
+      (node: HTMLSelectElement | null) => {
+        internalSelectRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLSelectElement | null>).current = node;
+        }
+      },
+      [ref],
+    );
+
+    const [selectedValue, setSelectedValue] = React.useState<any>(value ?? "");
+
+    React.useEffect(() => {
+      if (value !== undefined) {
+        setSelectedValue(value);
+      }
+    }, [value]);
+
+    React.useEffect(() => {
+      const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(event.target as Node)
+        ) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("touchstart", handleClickOutside);
+      };
+    }, []);
+
+    const selectedOption = options.find(
+      (opt: InputOption) => String(opt.value) === String(selectedValue),
+    );
+
+    const handleSelect = (optValue: string | number) => {
+      if (disabled) return;
+      setSelectedValue(optValue);
+      setIsOpen(false);
+
+      if (internalSelectRef.current) {
+        internalSelectRef.current.value = String(optValue);
+        const event = new Event("change", { bubbles: true });
+        internalSelectRef.current.dispatchEvent(event);
+      }
+
+      if (onChange) {
+        const syntheticEvent = {
+          target: { name: name || id, value: optValue },
+          currentTarget: { name: name || id, value: optValue },
+        };
+        onChange(syntheticEvent as any);
+      }
+    };
+
+    return (
+      <div ref={containerRef} className="relative w-full">
+        {/* Hidden select for form ref & RHF validation compatibility */}
+        <select
+          id={id}
+          name={name}
+          ref={setSelectRef}
+          value={selectedValue}
+          onChange={(e) => {
+            setSelectedValue(e.target.value);
+            if (onChange) onChange(e);
+          }}
+          disabled={disabled}
+          tabIndex={-1}
+          className="sr-only pointer-events-none"
+          {...props}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {options.map((opt: InputOption) => (
+            <option key={String(opt.value)} value={opt.value}>
+              {typeof opt.label === "string" ? opt.label : String(opt.value)}
+            </option>
+          ))}
+        </select>
+
+        {/* Custom Trigger Button */}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen((prev) => !prev)}
+          className={cn(
+            baseInputStyles,
+            "flex items-center justify-between cursor-pointer text-left select-none",
+            !selectedOption && "text-muted-foreground/60",
+            className,
+          )}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            {leftIcon && (
+              <span className="text-muted-foreground shrink-0">{leftIcon}</span>
+            )}
+            <span className="truncate">
+              {selectedOption
+                ? typeof selectedOption.label === "string"
+                  ? selectedOption.label
+                  : selectedOption.label
+                : placeholder || "Select..."}
+            </span>
+          </div>
+
+          <div className="text-muted-foreground shrink-0 flex items-center justify-center">
+            {rightIcon || (
+              <svg
+                className={cn(
+                  "w-4 h-4 fill-current opacity-70 transition-transform duration-200",
+                  isOpen && "rotate-180",
+                )}
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            )}
+          </div>
+        </button>
+
+        {/* Floating Custom Options Menu */}
+        {isOpen && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 z-50 max-h-60 overflow-y-auto rounded-xl border border-border/80 bg-card p-1.5 shadow-xl animate-in fade-in-0 zoom-in-95 duration-150">
+            {options.map((opt: InputOption) => {
+              const isSelected = String(opt.value) === String(value);
+              return (
+                <button
+                  key={String(opt.value)}
+                  type="button"
+                  disabled={opt.disabled}
+                  onClick={() => handleSelect(opt.value)}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center justify-between cursor-pointer",
+                    isSelected
+                      ? "bg-primary/10 text-primary font-bold"
+                      : "text-foreground hover:bg-muted/60",
+                    opt.disabled && "opacity-40 cursor-not-allowed",
+                  )}
+                >
+                  <span className="truncate">
+                    {typeof opt.label === "string"
+                      ? opt.label
+                      : String(opt.value)}
+                  </span>
+                  {isSelected && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
+CustomSelect.displayName = "CustomSelect";
+
 export const Input = React.forwardRef<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
   InputProps
@@ -113,12 +316,11 @@ export const Input = React.forwardRef<
     const inputId = id || generatedId;
     const effectiveType = type || variant;
 
-    // Base input styling
     const baseInputStyles = cn(
       "h-10 w-full min-w-0 rounded-xl border border-input bg-card px-3 py-2 text-sm transition-all duration-200 outline-none",
       "placeholder:text-muted-foreground/60 text-foreground",
       "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20",
-      "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-muted/50 disabled:opacity-50",
+      "disabled:cursor-not-allowed disabled:bg-muted/50 disabled:opacity-50",
       error && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
       leftIcon && "pl-9",
       rightIcon && "pr-9",
@@ -243,47 +445,20 @@ export const Input = React.forwardRef<
       return (
         <div className={cn("w-full flex flex-col", containerClassName)}>
           {renderLabel()}
-          <div className="relative w-full">
-            {leftIcon && (
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                {leftIcon}
-              </div>
-            )}
-            <select
-              id={inputId}
-              ref={ref as React.Ref<HTMLSelectElement>}
-              disabled={disabled}
-              value={value ?? ""}
-              onChange={onChange}
-              className={cn(baseInputStyles, "appearance-none cursor-pointer pr-8")}
-              {...(props as any)}
-            >
-              {placeholder && (
-                <option value="" disabled hidden>
-                  {placeholder}
-                </option>
-              )}
-              {options.map((opt) => (
-                <option
-                  key={String(opt.value)}
-                  value={opt.value}
-                  disabled={opt.disabled}
-                >
-                  {typeof opt.label === "string" ? opt.label : String(opt.value)}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-              {rightIcon || (
-                <svg
-                  className="w-4 h-4 fill-current opacity-70"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              )}
-            </div>
-          </div>
+          <CustomSelect
+            id={inputId}
+            ref={ref as React.Ref<HTMLSelectElement>}
+            disabled={disabled}
+            value={value}
+            onChange={onChange}
+            options={options}
+            placeholder={placeholder}
+            leftIcon={leftIcon}
+            rightIcon={rightIcon}
+            baseInputStyles={baseInputStyles}
+            className={className}
+            {...(props as any)}
+          />
           {renderMessage()}
         </div>
       );
