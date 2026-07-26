@@ -22,10 +22,8 @@ import {
   MessageSquare,
   FileText,
   Trash2,
-  ShieldCheck,
 } from "lucide-react";
 
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -53,9 +51,6 @@ const WorkspaceDashboard = () => {
     return <Loader page="dashboard" />;
   }
 
-  const { user } = useAuth();
-  const userDisplayName = user?.first_name || user?.username || "there";
-
   if (!dashboard) return null;
 
   const totalTasks = dashboard.total_tasks || 0;
@@ -65,81 +60,48 @@ const WorkspaceDashboard = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* --- HERO WELCOME & WORKSPACE HEADER --- */}
-      <div className="relative overflow-hidden bg-card rounded-2xl p-5 sm:p-7">
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-5 sm:gap-6">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-primary/30 shadow-md shrink-0 overflow-hidden">
-              <AvatarImage
-                src={dashboard.workspace_logo}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary text-primary-foreground">
-                {dashboard.workspace_name?.[0]?.toUpperCase() || "WS"}
-              </AvatarFallback>
-            </Avatar>
+      {/* --- UNIFIED HEADER WITH STATS CARDS --- */}
 
-            <div className="space-y-1.5 min-w-0">
-              <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-1">
-                  Welcome back, {userDisplayName}!
-                </span>
-                {dashboard.user_role && (
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] uppercase font-bold bg-primary/10 text-primary border-primary/30 px-2 py-0.5"
-                  >
-                    {dashboard.user_role === "owner" ? (
-                      <Crown className="w-3 h-3 mr-1 text-amber-500" />
-                    ) : (
-                      <ShieldCheck className="w-3 h-3 mr-1" />
-                    )}
-                    {dashboard.user_role}
-                  </Badge>
-                )}
-              </div>
-              {/* <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground truncate">
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col md:flex-row items-center md:items-start justify-between gap-4 sm:gap-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-border shadow-xs shrink-0 overflow-hidden">
+            <AvatarImage
+              src={dashboard.workspace_logo}
+              className="object-cover"
+            />
+            <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary/10 text-primary">
+              {dashboard.workspace_name?.[0]?.toUpperCase() || "WS"}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight">
                 {dashboard.workspace_name}
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                {dashboard.workspace_description ||
-                  "Manage your workspace projects, tasks, documents, and team members in one place."}
-              </p> */}
+              </h2>
             </div>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+              {dashboard.workspace_description ||
+                "Welcome to your workspace dashboard. Here is a summary of your team's workload and recent updates."}
+            </p>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 justify-center md:justify-end shrink-0 w-full md:w-auto">
-            {isAdminOrOwner && (
+        <div className="flex items-center gap-3 w-auto md:w-auto justify-center md:justify-end border-t md:border-t-0 border-border pt-4 md:pt-0">
+          {isAdminOrOwner && (
+            <>
               <Button
+                size="sm"
                 onClick={() => setIsAddProjectModalOpen(true)}
-                className="rounded-xl gap-2 text-xs sm:text-sm shadow-xs bg-primary hover:bg-primary/90 text-primary-foreground h-9 sm:h-10 px-4 font-semibold"
+                className="rounded-md gap-2 text-xs shadow-xs"
               >
                 <Plus className="w-4 h-4" />
                 New Project
               </Button>
-            )}
-            <Link href={`/workspace/${workspaceId}/docs`}>
-              <Button
-                variant="outline"
-                className="rounded-xl gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3.5 bg-background/80 hover:bg-background"
-              >
-                <FileText className="w-4 h-4 text-sky-500" />
-                Docs
-              </Button>
-            </Link>
-            <Link href={`/workspace/${workspaceId}/members`}>
-              <Button
-                variant="outline"
-                className="rounded-xl gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3.5 bg-background/80 hover:bg-background"
-              >
-                <Users className="w-4 h-4 text-purple-500" />
-                Members
-              </Button>
-            </Link>
-          </div>
+            </>
+          )}
         </div>
       </div>
-
       <Header
         stats={[
           {
@@ -148,7 +110,7 @@ const WorkspaceDashboard = () => {
             icon: <Folder className="w-5 h-5 text-primary" />,
           },
           {
-            title: "Team Members",
+            title: "Members",
             value: dashboard.total_members || 0,
             icon: <Users className="w-5 h-5 text-purple-500" />,
           },
@@ -248,7 +210,7 @@ const WorkspaceDashboard = () => {
                 href={`/workspace/${workspaceId}/projects`}
                 className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
               >
-                View All Projects <ArrowRight className="w-3.5 h-3.5" />
+                View All <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
