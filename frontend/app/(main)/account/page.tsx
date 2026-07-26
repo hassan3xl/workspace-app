@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutDashboard, User, Lock, Bell } from "lucide-react";
+import { LayoutDashboard, User, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -10,7 +10,6 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverviewTab } from "@/components/profile/ProfileOverviewTab";
 import { ProfileFormTab } from "@/components/profile/ProfileFormTab";
 import { ProfileSecurityTab } from "@/components/profile/ProfileSecurityTab";
-import { ProfilePreferencesTab } from "@/components/profile/ProfilePreferencesTab";
 
 // Hooks
 import { useGetProfile, useUploaadAvatar } from "@/lib/hooks/account.hook";
@@ -23,7 +22,6 @@ const sidebarNavItems = [
   { title: "Overview", icon: LayoutDashboard, id: "overview" },
   { title: "Profile", icon: User, id: "profile" },
   { title: "Security", icon: Lock, id: "security" },
-  { title: "Preferences", icon: Bell, id: "preferences" },
 ];
 
 export default function AccountPage() {
@@ -70,7 +68,7 @@ export default function AccountPage() {
         <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 w-full min-w-0">
           <div className="w-full lg:w-56 shrink-0">
             <div className="flex lg:flex-col gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full">
-              {[...Array(4)].map((_, i) => (
+              {[...Array(3)].map((_, i) => (
                 <Skeleton key={i} className="h-9 w-24 lg:w-full rounded-lg shrink-0" />
               ))}
             </div>
@@ -96,7 +94,7 @@ export default function AccountPage() {
         isUploadingAvatar={uploadAvatar.isPending}
       />
 
-      {/* Tab Navigation — horizontal scroll on mobile, vertical sidebar on lg */}
+      {/* Tab Navigation */}
       <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 w-full min-w-0">
         <aside className="w-full lg:w-56 shrink-0 min-w-0">
           <div className="lg:sticky lg:top-20 w-full min-w-0">
@@ -136,7 +134,6 @@ export default function AccountPage() {
           )}
           {activeTab === "profile" && <ProfileFormTab profile={profile} />}
           {activeTab === "security" && <ProfileSecurityTab profile={profile} />}
-          {activeTab === "preferences" && <ProfilePreferencesTab />}
         </main>
       </div>
     </div>

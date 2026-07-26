@@ -18,8 +18,14 @@ import {
   Sparkles,
   Plus,
   Crown,
+  UserPlus,
+  MessageSquare,
+  FileText,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -47,6 +53,9 @@ const WorkspaceDashboard = () => {
     return <Loader page="dashboard" />;
   }
 
+  const { user } = useAuth();
+  const userDisplayName = user?.first_name || user?.username || "there";
+
   if (!dashboard) return null;
 
   const totalTasks = dashboard.total_tasks || 0;
@@ -55,49 +64,82 @@ const WorkspaceDashboard = () => {
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <div className="">
-      {/* --- UNIFIED HEADER WITH STATS CARDS --- */}
+    <div className="space-y-6 sm:space-y-8">
+      {/* --- HERO WELCOME & WORKSPACE HEADER --- */}
+      <div className="relative overflow-hidden bg-card rounded-2xl p-5 sm:p-7">
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-5 sm:gap-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
+            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-primary/30 shadow-md shrink-0 overflow-hidden">
+              <AvatarImage
+                src={dashboard.workspace_logo}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary text-primary-foreground">
+                {dashboard.workspace_name?.[0]?.toUpperCase() || "WS"}
+              </AvatarFallback>
+            </Avatar>
 
-      <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-border shadow-xs shrink-0 overflow-hidden">
-            <AvatarImage
-              src={dashboard.workspace_logo}
-              className="object-cover"
-            />
-            <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary/10 text-primary">
-              {dashboard.workspace_name?.[0]?.toUpperCase() || "WS"}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight">
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-1">
+                  Welcome back, {userDisplayName}!
+                </span>
+                {dashboard.user_role && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase font-bold bg-primary/10 text-primary border-primary/30 px-2 py-0.5"
+                  >
+                    {dashboard.user_role === "owner" ? (
+                      <Crown className="w-3 h-3 mr-1 text-amber-500" />
+                    ) : (
+                      <ShieldCheck className="w-3 h-3 mr-1" />
+                    )}
+                    {dashboard.user_role}
+                  </Badge>
+                )}
+              </div>
+              {/* <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground truncate">
                 {dashboard.workspace_name}
-              </h2>
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                {dashboard.workspace_description ||
+                  "Manage your workspace projects, tasks, documents, and team members in one place."}
+              </p> */}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-              {dashboard.workspace_description ||
-                "Welcome to your workspace dashboard. Here is a summary of your team's workload and recent updates."}
-            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3 w-auto md:w-auto justify-center md:justify-end border-t md:border-t-0 border-border/60 pt-4 md:pt-0">
-          {isAdminOrOwner && (
-            <>
+          <div className="flex flex-wrap items-center gap-2.5 justify-center md:justify-end shrink-0 w-full md:w-auto">
+            {isAdminOrOwner && (
               <Button
-                size="sm"
                 onClick={() => setIsAddProjectModalOpen(true)}
-                className="rounded-md gap-2 text-xs shadow-xs"
+                className="rounded-xl gap-2 text-xs sm:text-sm shadow-xs bg-primary hover:bg-primary/90 text-primary-foreground h-9 sm:h-10 px-4 font-semibold"
               >
                 <Plus className="w-4 h-4" />
                 New Project
               </Button>
-            </>
-          )}
+            )}
+            <Link href={`/workspace/${workspaceId}/docs`}>
+              <Button
+                variant="outline"
+                className="rounded-xl gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3.5 bg-background/80 hover:bg-background"
+              >
+                <FileText className="w-4 h-4 text-sky-500" />
+                Docs
+              </Button>
+            </Link>
+            <Link href={`/workspace/${workspaceId}/members`}>
+              <Button
+                variant="outline"
+                className="rounded-xl gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3.5 bg-background/80 hover:bg-background"
+              >
+                <Users className="w-4 h-4 text-purple-500" />
+                Members
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
+
       <Header
         stats={[
           {
@@ -106,7 +148,7 @@ const WorkspaceDashboard = () => {
             icon: <Folder className="w-5 h-5 text-primary" />,
           },
           {
-            title: "Members",
+            title: "Team Members",
             value: dashboard.total_members || 0,
             icon: <Users className="w-5 h-5 text-purple-500" />,
           },
@@ -122,8 +164,6 @@ const WorkspaceDashboard = () => {
           },
         ]}
       />
-
-      <br />
 
       {/* --- MAIN GRID LAYOUT --- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
@@ -142,7 +182,7 @@ const WorkspaceDashboard = () => {
                 </Badge>
               </div>
 
-              <div className="bg-card border border-border/60 rounded-2xl shadow-xs overflow-hidden divide-y divide-border/60">
+              <div className="bg-card border border-border rounded-2xl shadow-xs overflow-hidden divide-y divide-border">
                 {dashboard.my_tasks.slice(0, 5).map((task: any) => (
                   <div
                     key={task.id}
@@ -151,20 +191,20 @@ const WorkspaceDashboard = () => {
                         `/workspace/${workspaceId}/projects/${task.project_id}`,
                       )
                     }
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-muted/40 transition-all cursor-pointer group"
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card cursor-pointer"
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0">
                       <div
                         className={`w-3 h-3 rounded-full shrink-0 ${
                           task.priority === "high"
-                            ? "bg-red-500 shadow-xs"
+                            ? "bg-red-500"
                             : task.priority === "medium"
-                              ? "bg-amber-500 shadow-xs"
-                              : "bg-blue-500 shadow-xs"
+                              ? "bg-amber-500"
+                              : "bg-blue-500"
                         }`}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                        <p className="font-semibold text-sm text-foreground truncate">
                           {task.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
@@ -185,7 +225,7 @@ const WorkspaceDashboard = () => {
                       </Badge>
 
                       {task.due_date && (
-                        <span className="text-xs text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-lg flex items-center gap-1.5 shrink-0">
                           <Clock className="w-3.5 h-3.5 text-primary" />
                           {formatDate(task.due_date)}
                         </span>
@@ -224,8 +264,8 @@ const WorkspaceDashboard = () => {
 
               {(!dashboard?.active_projects ||
                 dashboard.active_projects.length === 0) && (
-                <div className="col-span-full p-8 border border-dashed border-border/80 rounded-2xl text-center bg-muted/10 space-y-3">
-                  <Folder className="w-10 h-10 mx-auto text-muted-foreground/50" />
+                <div className="col-span-full p-8 border border-dashed border-border rounded-2xl text-center bg-muted space-y-3">
+                  <Folder className="w-10 h-10 mx-auto text-muted-foreground" />
                   <div>
                     <p className="font-semibold text-sm">
                       No active projects yet
@@ -254,39 +294,148 @@ const WorkspaceDashboard = () => {
         {/* RIGHT COLUMN (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
           {/* RECENT ACTIVITY WIDGET */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-border/60 bg-muted/20 flex items-center justify-between">
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-border bg-muted/40 flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Activity className="w-4 h-4 text-primary" />
                 Recent Activity
               </h3>
+              <Link
+                href={`/workspace/${workspaceId}/activity`}
+                className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
+              >
+                View All <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-3 space-y-2">
               {dashboard?.activities?.length > 0 ? (
-                dashboard.activities.slice(0, 5).map((activity: any) => (
-                  <div
-                    key={activity.id}
-                    className="flex gap-3 text-xs leading-relaxed"
-                  >
-                    <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-foreground">
-                        <span className="font-semibold">
-                          {activity.actor_name || "User"}
-                        </span>{" "}
-                        {activity.action_type}{" "}
-                        <span className="text-muted-foreground font-medium">
-                          {activity.target_text}
-                        </span>
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {timeAgo(activity.created_at)}
-                      </p>
+                dashboard.activities.slice(0, 5).map((activity: any) => {
+                  const meta = (() => {
+                    switch (activity.action_type) {
+                      case "create_project":
+                        return {
+                          label: "created project",
+                          icon: (
+                            <FolderPlus className="w-3.5 h-3.5 text-blue-500" />
+                          ),
+                          badgeClass: "bg-blue-500/10 border-blue-500/20",
+                        };
+                      case "add_project_member":
+                        return {
+                          label: "added member to project",
+                          icon: (
+                            <UserPlus className="w-3.5 h-3.5 text-purple-500" />
+                          ),
+                          badgeClass: "bg-purple-500/10 border-purple-500/20",
+                        };
+                      case "create_task":
+                        return {
+                          label: "created task",
+                          icon: (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          ),
+                          badgeClass: "bg-emerald-500/10 border-emerald-500/20",
+                        };
+                      case "start_task":
+                        return {
+                          label: "started task",
+                          icon: (
+                            <Clock className="w-3.5 h-3.5 text-amber-500" />
+                          ),
+                          badgeClass: "bg-amber-500/10 border-amber-500/20",
+                        };
+                      case "complete_task":
+                        return {
+                          label: "completed task",
+                          icon: (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          ),
+                          badgeClass: "bg-emerald-500/10 border-emerald-500/20",
+                        };
+                      case "comment":
+                        return {
+                          label: "commented on",
+                          icon: (
+                            <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                          ),
+                          badgeClass: "bg-indigo-500/10 border-indigo-500/20",
+                        };
+                      case "upload_document":
+                        return {
+                          label: "uploaded document",
+                          icon: (
+                            <FileText className="w-3.5 h-3.5 text-sky-500" />
+                          ),
+                          badgeClass: "bg-sky-500/10 border-sky-500/20",
+                        };
+                      case "delete_document":
+                        return {
+                          label: "deleted document",
+                          icon: (
+                            <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                          ),
+                          badgeClass: "bg-rose-500/10 border-rose-500/20",
+                        };
+                      default:
+                        return {
+                          label: activity.action_type
+                            ? activity.action_type.replace(/_/g, " ")
+                            : "updated",
+                          icon: (
+                            <Activity className="w-3.5 h-3.5 text-slate-500" />
+                          ),
+                          badgeClass: "bg-muted border-border",
+                        };
+                    }
+                  })();
+
+                  return (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 p-2.5 rounded-xl border border-transparent hover:border-border/60 hover:bg-muted/40 transition-all duration-200"
+                    >
+                      <Avatar className="w-8 h-8 rounded-full border border-border shrink-0 mt-0.5">
+                        <AvatarImage src={activity.actor_avatar} />
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+                          {(activity.actor_name?.[0] || "U").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1 min-w-0 text-xs">
+                        <div className="flex items-center gap-1.5 flex-wrap leading-tight">
+                          <span className="font-bold text-foreground truncate max-w-[120px]">
+                            {activity.actor_name ||
+                              activity.actor_username ||
+                              "User"}
+                          </span>
+                          <span className="text-muted-foreground font-medium">
+                            {meta.label}
+                          </span>
+                          {activity.target_text && (
+                            <span
+                              className="font-semibold text-foreground bg-accent/50 px-1.5 py-0.5 rounded text-[11px] truncate max-w-[140px]"
+                              title={activity.target_text}
+                            >
+                              {activity.target_text}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                          <Clock className="w-3 h-3 text-muted-foreground/70" />
+                          <span>{timeAgo(activity.created_at)}</span>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`p-1.5 rounded-lg border shrink-0 ${meta.badgeClass}`}
+                      >
+                        {meta.icon}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <p className="text-xs text-muted-foreground text-center py-4">
+                <p className="text-xs text-muted-foreground text-center py-6">
                   No recent activity logged.
                 </p>
               )}
@@ -294,8 +443,8 @@ const WorkspaceDashboard = () => {
           </div>
 
           {/* TEAM MEMBERS WIDGET */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-border/60 flex justify-between items-center bg-muted/20">
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-border flex justify-between items-center bg-muted">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <Users className="w-4 h-4 text-purple-500" />
                 Team Members

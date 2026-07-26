@@ -34,6 +34,9 @@ urlpatterns = [
         name="workspace-invitations"
     ),
 
+    # documents url
+    path('<uuid:workspace_id>/documents/', include("api.routes.document_urls")),
+
     # projects url
     path('', include("api.routes.project_urls")),
 

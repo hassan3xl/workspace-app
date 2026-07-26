@@ -41,9 +41,25 @@ class DashboardTaskSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'priority', 'due_date', 'project_title', 'status']
 
 class ActivityLogSerializer(serializers.ModelSerializer):
-    actor_name = serializers.CharField(source='actor.profile.username')
-    actor_avatar = serializers.ImageField(source='actor.profile.avatar', read_only=True)
+    actor_name = serializers.SerializerMethodField()
+    actor_username = serializers.CharField(source='actor.profile.username', read_only=True)
+    actor_avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityLog
-        fields = ['id', 'actor_name', 'actor_avatar', 'action_type', 'target_text', 'created_at']
+        fields = ['id', 'actor_name', 'actor_username', 'actor_avatar', 'action_type', 'target_text', 'created_at']
+
+    def get_actor_name(self, obj):
+        if hasattr(obj.actor, 'profile'):
+            fn = (obj.actor.profile.first_name or "").strip()
+            ln = (obj.actor.profile.last_name or "").strip()
+            name = f"{fn} {ln}".strip()
+            if name:
+                return name
+            return obj.actor.profile.username
+        return obj.actor.email
+
+    def get_actor_avatar(self, obj):
+        if hasattr(obj.actor, 'profile') and obj.actor.profile.avatar:
+            return obj.actor.profile.avatar.url
+        return None

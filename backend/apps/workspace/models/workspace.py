@@ -4,12 +4,6 @@ import uuid
 
 
 class Workspace(models.Model):
-    VISIBILITY_CHOICES = (
-        ('private', 'Private'),
-        ('invite', 'Invite Only'),
-        ('public', 'Public'),
-    )
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
@@ -20,11 +14,6 @@ class Workspace(models.Model):
         related_name='owned_workspaces'
     )
 
-    visibility = models.CharField(
-        max_length=10,
-        choices=VISIBILITY_CHOICES,
-        default='private'
-    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

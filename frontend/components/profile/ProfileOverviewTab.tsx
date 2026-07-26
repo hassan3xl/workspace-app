@@ -1,19 +1,15 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import {
   User,
   Mail,
   Phone,
-  Building2,
   Inbox,
   ArrowRight,
   Check,
   X,
-  Sparkles,
-  ExternalLink,
-  Clock,
+  Bell,
 } from "lucide-react";
 import {
   Card,
@@ -24,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { ProfilePType } from "@/lib/types/user.types";
 import {
   useAcceptWorkspaceInvitation,
@@ -32,22 +29,79 @@ import {
 
 interface ProfileOverviewTabProps {
   profile: ProfilePType | undefined | null;
-  workspaces: any[] | undefined;
-  invitations: any[] | undefined;
+  workspaces?: any[];
+  invitations?: any[];
   setActiveTab: (tab: string) => void;
 }
 
 export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   profile,
-  workspaces = [],
   invitations = [],
   setActiveTab,
 }) => {
   const acceptInvite = useAcceptWorkspaceInvitation();
   const rejectInvite = useRejectWorkspaceInvitation();
 
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [workspaceInvitesAlert, setWorkspaceInvitesAlert] = useState(true);
+  const [securityAlerts, setSecurityAlerts] = useState(true);
+
+  const savePreferences = () => {
+    toast.success("Notification preferences saved successfully!");
+  };
+
+  const toggleItems = [
+    {
+      label: "Workspace Activity & Mentions",
+      description: "Get emails when team members tag or mention you.",
+      checked: emailAlerts,
+      onChange: setEmailAlerts,
+    },
+    {
+      label: "Workspace Invitations",
+      description: "Get notified when someone invites you to a workspace.",
+      checked: workspaceInvitesAlert,
+      onChange: setWorkspaceInvitesAlert,
+    },
+    {
+      label: "Security & Account Alerts",
+      description: "Important notifications about logins or password changes.",
+      checked: securityAlerts,
+      onChange: setSecurityAlerts,
+    },
+  ];
+
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0">
+      {/* Missing Name Emphasis Banner */}
+      {!profile?.first_name && !profile?.last_name && (
+        <Card className="border-amber-500/40 bg-amber-500/10">
+          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="font-bold text-sm text-foreground">
+                  Complete Your Profile: Add Your Name
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Your first and last name help your teammates recognize you
+                  across workspace projects, tasks, and documents.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => setActiveTab("profile")}
+              className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs gap-1.5 shrink-0 self-end sm:self-auto shadow-xs"
+            >
+              Add Name Now <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Bio & Personal Info */}
       <Card className="border-border w-full min-w-0">
         <CardHeader className="pb-2 sm:pb-3">
@@ -55,14 +109,6 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
               <User className="w-4 h-4 text-primary shrink-0" /> About You
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-muted-foreground hover:text-primary h-7 sm:h-8 px-2"
-              onClick={() => setActiveTab("profile")}
-            >
-              Edit
-            </Button>
           </div>
           <CardDescription className="text-xs sm:text-sm">
             Bio and display information
@@ -109,7 +155,9 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2 text-amber-600 dark:text-amber-400">
                 <Inbox className="w-4 h-4 shrink-0" />
-                <span className="truncate">Pending Invitations ({invitations.length})</span>
+                <span className="truncate">
+                  Pending Invitations ({invitations.length})
+                </span>
               </CardTitle>
               <Badge className="bg-amber-500 text-white text-[10px] sm:text-xs shrink-0">
                 Action Required
@@ -160,88 +208,47 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
         </Card>
       )}
 
-      {/* Recent Workspaces */}
+      {/* Notification Preferences */}
       <Card className="border-border w-full min-w-0">
-        <CardHeader className="pb-2 sm:pb-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-primary shrink-0" /> Your Workspaces
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                Workspaces you belong to or manage
-              </CardDescription>
-            </div>
-            <Link href="/workspace" className="shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs gap-1 text-primary hover:text-primary/80 h-7 sm:h-8 px-2"
-              >
-                View All ({workspaces.length})
-                <ArrowRight className="w-3 h-3" />
-              </Button>
-            </Link>
-          </div>
+        <CardHeader className="pb-2 sm:pb-4">
+          <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+            Notification Preferences
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Control what emails and workspace notifications you receive.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {workspaces.length === 0 ? (
-            <div className="text-center py-6 sm:py-8 border border-dashed rounded-lg space-y-2 sm:space-y-3">
-              <Building2 className="w-7 h-7 mx-auto text-muted-foreground/50" />
-              <p className="text-xs sm:text-sm font-medium">No workspaces yet</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground max-w-xs mx-auto">
-                Create a workspace or get invited to collaborate.
-              </p>
-              <Link href="/workspace/create" className="inline-block pt-1">
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs h-8"
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> Create Workspace
-                </Button>
-              </Link>
+        <CardContent className="space-y-2 sm:space-y-3">
+          {toggleItems.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-start sm:items-center justify-between p-3 rounded-lg border border-border bg-card gap-3"
+            >
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium">{item.label}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={item.checked}
+                onChange={(e) => item.onChange(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0 mt-0.5 sm:mt-0"
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {workspaces.slice(0, 4).map((ws: any) => (
-                <div
-                  key={ws.id}
-                  className="p-3 sm:p-4 rounded-lg border border-border/80 bg-card hover:border-primary/40 hover:shadow-sm transition-all space-y-2 sm:space-y-3 flex flex-col justify-between"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-xs sm:text-sm truncate">
-                        {ws.name}
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] capitalize shrink-0"
-                      >
-                        {ws.role || ws.user_role || "Member"}
-                      </Badge>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
-                      {ws.description || "No description provided."}
-                    </p>
-                  </div>
-                  <div className="pt-2 border-t border-border/50 flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Active
-                    </span>
-                    <Link href={`/workspace/${ws.id}`}>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 text-[10px] sm:text-xs gap-1 hover:text-primary p-0"
-                      >
-                        Open <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
+
+          <div className="flex justify-end pt-2">
+            <Button
+              size="sm"
+              onClick={savePreferences}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8 sm:h-9"
+            >
+              Save Preferences
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

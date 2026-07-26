@@ -147,29 +147,56 @@ export const ProfileFormTab: React.FC<ProfileFormTabProps> = ({ profile }) => {
             </div>
           </div>
 
+          {/* Missing Name Banner */}
+          {!profile?.first_name && !profile?.last_name && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-amber-900 dark:text-amber-200">
+              <User className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <h4 className="font-bold text-sm text-foreground">Action Suggested: Add Your Name</h4>
+                <p className="text-xs text-muted-foreground">
+                  Please enter your first and last name below so team members can easily identify you across workspaces.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Form Fields */}
           <form onSubmit={handleSubmit(onUpdateProfile)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="first_name" className="text-xs font-medium">
-                  First Name
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="first_name" className="text-xs font-medium">
+                    First Name
+                  </Label>
+                  {!profile?.first_name && (
+                    <span className="text-[10px] text-amber-600 font-semibold uppercase">Required for display</span>
+                  )}
+                </div>
                 <Input
                   id="first_name"
                   {...register("first_name")}
                   placeholder="e.g. Hassan"
-                  className="bg-background h-9 text-sm"
+                  className={`bg-background h-9 text-sm ${
+                    !profile?.first_name ? "border-amber-500 ring-1 ring-amber-500/30" : ""
+                  }`}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="last_name" className="text-xs font-medium">
-                  Last Name
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="last_name" className="text-xs font-medium">
+                    Last Name
+                  </Label>
+                  {!profile?.last_name && (
+                    <span className="text-[10px] text-amber-600 font-semibold uppercase">Required for display</span>
+                  )}
+                </div>
                 <Input
                   id="last_name"
                   {...register("last_name")}
                   placeholder="e.g. Saidu"
-                  className="bg-background h-9 text-sm"
+                  className={`bg-background h-9 text-sm ${
+                    !profile?.last_name ? "border-amber-500 ring-1 ring-amber-500/30" : ""
+                  }`}
                 />
               </div>
             </div>

@@ -55,7 +55,6 @@ import {
 type EditForm = {
   name: string;
   description: string;
-  visibility: string;
 };
 
 const WorkspaceSettingsPage = () => {
@@ -79,9 +78,6 @@ const WorkspaceSettingsPage = () => {
     "general" | "members" | "invites" | "danger"
   >("general");
 
-  if (workspaceLoading) {
-    return <Loader page="settings" />;
-  }
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{
@@ -101,7 +97,6 @@ const WorkspaceSettingsPage = () => {
     defaultValues: {
       name: "",
       description: "",
-      visibility: "private",
     },
   });
 
@@ -110,7 +105,6 @@ const WorkspaceSettingsPage = () => {
       reset({
         name: workspace.name || "",
         description: workspace.description || "",
-        visibility: workspace.visibility || "private",
       });
     }
   }, [workspace, reset]);
@@ -124,16 +118,18 @@ const WorkspaceSettingsPage = () => {
     };
   }, [logoPreview]);
 
+  // Redirect if workspace does not exist (e.g. deleted) or user is not authorized
+  useEffect(() => {
+    if (!workspaceLoading && (!workspace || !isAdminOrOwner)) {
+      router.push("/workspace");
+    }
+  }, [workspaceLoading, workspace, isAdminOrOwner, router]);
+
   if (workspaceLoading) {
-    return <Loader variant="dots" title="Loading Workspace Settings..." />;
+    return <Loader page="settings" />;
   }
 
-  if (!workspace) {
-    return null;
-  }
-
-  if (!isAdminOrOwner) {
-    router.push(`/workspace/${workspaceId}`);
+  if (!workspace || !isAdminOrOwner) {
     return null;
   }
 
@@ -243,14 +239,6 @@ const WorkspaceSettingsPage = () => {
         subtitle="Manage workspace settings, member permissions, and invitations"
         showBackButton
         onBack={() => router.push(`/workspace/${workspaceId}`)}
-        actions={
-          <Badge
-            variant="outline"
-            className="text-xs uppercase tracking-wider font-semibold px-2.5 py-1"
-          >
-            {workspace.visibility || "Private"}
-          </Badge>
-        }
       />
 
       {/* --- WORKSPACE SUMMARY CARD WITH LIVE LOGO PREVIEW --- */}
@@ -420,7 +408,7 @@ const WorkspaceSettingsPage = () => {
               General Workspace Settings
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Update the name, description, and visibility of this workspace.
+              Update the name and description of this workspace.
             </p>
           </div>
 
@@ -499,33 +487,39 @@ const WorkspaceSettingsPage = () => {
           </div>
 
           <div className="divide-y divide-border/60">
-            {filteredMembers.map((member: any) => (
-              <div
-                key={member.id}
-                className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                  <Avatar className="w-10 h-10 rounded-full border border-border/50 shrink-0">
-                    <AvatarImage src={member.user?.avatar} />
-                    <AvatarFallback className="font-bold bg-primary/10 text-primary">
-                      {(member.user?.email || "U")[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+            {filteredMembers.map((member: any) => {
+              const u = member.user || {};
+              const fn = u.full_name || (u.first_name || u.last_name ? `${u.first_name || ""} ${u.last_name || ""}`.trim() : null);
+              const pName = fn || (u.username ? `@${u.username}` : u.email);
+              const sName = fn ? (u.username ? `@${u.username} • ${u.email}` : u.email) : u.email;
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm truncate">
-                        {member.user?.full_name || member.user?.email}
-                      </span>
-                      {member.role === "owner" && (
-                        <Crown className="w-4 h-4 text-amber-500 shrink-0" />
-                      )}
+              return (
+                <div
+                  key={member.id}
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    <Avatar className="w-10 h-10 rounded-full border border-border shrink-0">
+                      <AvatarImage src={u.avatar} />
+                      <AvatarFallback className="font-bold bg-primary/10 text-primary">
+                        {(pName?.[0] === "@" ? pName?.[1] : pName?.[0])?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm truncate">
+                          {pName}
+                        </span>
+                        {member.role === "owner" && (
+                          <Crown className="w-4 h-4 text-amber-500 shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {sName}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {member.user?.email}
-                    </p>
                   </div>
-                </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                   <Badge
@@ -572,7 +566,8 @@ const WorkspaceSettingsPage = () => {
                   )}
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         </div>
       )}

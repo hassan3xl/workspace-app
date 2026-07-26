@@ -3,8 +3,6 @@
 import React, { useState } from "react";
 import {
   Upload,
-  Globe,
-  Lock,
   Briefcase,
   Code,
   Megaphone,
@@ -32,7 +30,6 @@ interface AddServerModalProps {
 interface FormData {
   name: string;
   description: string;
-  visibility: "public" | "private";
   category: string;
   template: string;
 }
@@ -69,7 +66,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("software");
   const [selectedTemplate, setSelectedTemplate] = useState("agile");
-  const [visibility, setVisibility] = useState<"private" | "public">("private");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +75,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
     reset,
   } = useForm<FormData>({
     defaultValues: {
-      visibility: "private",
       category: "software",
       template: "agile",
     },
@@ -95,7 +90,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
       setPreviewUrl(null);
       setSelectedCategory("software");
       setSelectedTemplate("agile");
-      setVisibility("private");
       setIsSubmitting(false);
     }
   }, [isOpen, reset]);
@@ -117,7 +111,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
         ...data,
         category: selectedCategory,
         template: selectedTemplate,
-        visibility,
       };
 
       const newWorkspace = await createWorkspace(payload);
@@ -152,14 +145,14 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
       <div className="space-y-6 py-2">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Logo & Basic Info Section */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-muted/20 rounded-2xl border border-border/60">
+          <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-muted rounded-2xl border border-border">
             {/* Logo Upload & Preview */}
             <div className="flex flex-col items-center space-y-2 shrink-0">
               <label htmlFor="workspace-logo-upload" className="cursor-pointer group relative">
-                <Avatar className="w-20 h-20 border-2 border-dashed border-primary/40 group-hover:border-primary transition-all">
+                <Avatar className="w-20 h-20 border-2 border-dashed border-primary/40 group-hover:border-primary">
                   <AvatarImage src={previewUrl || ""} className="object-cover" />
                   <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl flex flex-col items-center justify-center">
-                    <Upload className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                    <Upload className="w-6 h-6 text-primary" />
                     <span className="text-[9px] uppercase font-semibold mt-1">Logo</span>
                   </AvatarFallback>
                 </Avatar>
@@ -206,10 +199,10 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-medium text-left transition-all ${
+                    className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-medium text-left ${
                       isSelected
                         ? "bg-primary/10 text-primary border-primary/40 ring-1 ring-primary/20 font-semibold"
-                        : "bg-card hover:bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
@@ -217,50 +210,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Visibility & Access Control */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Access & Visibility
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setVisibility("private")}
-                className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
-                  visibility === "private"
-                    ? "bg-card border-primary/40 ring-1 ring-primary/20 shadow-xs"
-                    : "bg-card/50 border-border/60 hover:bg-card text-muted-foreground"
-                }`}
-              >
-                <Lock className={`w-5 h-5 mt-0.5 ${visibility === "private" ? "text-primary" : "text-muted-foreground"}`} />
-                <div>
-                  <p className="text-xs font-bold text-foreground">Private Workspace</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Only explicitly invited team members can join.
-                  </p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setVisibility("public")}
-                className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
-                  visibility === "public"
-                    ? "bg-card border-primary/40 ring-1 ring-primary/20 shadow-xs"
-                    : "bg-card/50 border-border/60 hover:bg-card text-muted-foreground"
-                }`}
-              >
-                <Globe className={`w-5 h-5 mt-0.5 ${visibility === "public" ? "text-primary" : "text-muted-foreground"}`} />
-                <div>
-                  <p className="text-xs font-bold text-foreground">Public Workspace</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Accessible to anyone within your organization.
-                  </p>
-                </div>
-              </button>
             </div>
           </div>
 
@@ -277,10 +226,10 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
                     key={tmpl.id}
                     type="button"
                     onClick={() => setSelectedTemplate(tmpl.id)}
-                    className={`p-3 rounded-xl border text-left transition-all space-y-1 ${
+                    className={`p-3 rounded-xl border text-left space-y-1 ${
                       isSelected
                         ? "bg-primary/10 border-primary/40 text-primary font-semibold"
-                        : "bg-card border-border/60 hover:bg-muted/30 text-muted-foreground"
+                        : "bg-card border-border text-muted-foreground"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -297,7 +246,7 @@ const CreateWorkspaceModal = ({ isOpen, onClose }: AddServerModalProps) => {
           </div>
 
           {/* Submit Action */}
-          <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3">
+          <div className="pt-3 border-t border-border flex items-center justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose} className="rounded-xl text-xs">
               Cancel
             </Button>

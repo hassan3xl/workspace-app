@@ -106,5 +106,25 @@ def on_user_signed_up(request, user, **kwargs):
 
 @receiver(pre_social_login)
 def on_pre_social_login(request, sociallogin, **kwargs):
-    if sociallogin and sociallogin.account and sociallogin.user and sociallogin.user.pk:
+    if not sociallogin:
+        return
+
+    # If the social account is not yet linked to an existing user in DB
+    if not sociallogin.is_existing:
+        email = None
+        if sociallogin.account and sociallogin.account.extra_data:
+            email = sociallogin.account.extra_data.get("email")
+        if not email and sociallogin.user and sociallogin.user.email:
+            email = sociallogin.user.email
+
+        if email:
+            email = email.lower().strip()
+            try:
+                existing_user = User.objects.get(email__iexact=email)
+                sociallogin.connect(request, existing_user)
+            except User.DoesNotExist:
+                pass
+
+    if sociallogin.user and getattr(sociallogin.user, "pk", None):
         sync_google_profile_data(sociallogin.user, sociallogin.account.extra_data)
+

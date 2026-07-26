@@ -42,7 +42,7 @@ const WorkspacesPage = () => {
   console.log("workspaces", workspaces);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "owned" | "invitations">(
-    "all"
+    "all",
   );
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [openCreateWorkspaceModal, setOpenCreateWorkspaceModal] =

@@ -13,7 +13,6 @@ export type WorkspaceType = {
   description: string;
   owner: UserType;
   is_owner: boolean;
-  visibility: "public" | "private";
   logo: string;
   created_at: string;
   user_role: "admin" | "member" | "guest" | "owner";

@@ -30,7 +30,7 @@ export default function UserCard() {
         // Desktop: Simple Avatar
         "md:justify-center md:p-0",
         // Mobile: Card style
-        "p-2 rounded-xl hover:bg-accent bg-accent/30"
+        "p-2 rounded-xl hover:bg-accent bg-accent/30",
       )}
     >
       <div className="relative w-10 h-10 shrink-0">
@@ -48,20 +48,15 @@ export default function UserCard() {
       <div
         className={cn(
           "md:hidden flex flex-col items-start overflow-hidden",
-          !isOpen && "hidden"
+          !isOpen && "hidden",
         )}
       >
-        <p className="text-sm font-bold truncate w-32 text-left">
+        <p className="text-md font-semibold truncate w-32 text-left">
           {user?.username}
         </p>
         <p className="text-xs text-muted-foreground truncate w-32 text-left">
           {user?.user.email}
         </p>
-      </div>
-
-      {/* Mobile Settings Icon */}
-      <div className={cn("md:hidden ml-auto", !isOpen && "hidden")}>
-        <Settings className="w-4 h-4 text-muted-foreground" />
       </div>
     </button>
   );

@@ -103,6 +103,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">
                   {fullName}
                 </h1>
+                {!profile?.first_name && !profile?.last_name && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 font-semibold"
+                  >
+                    Name Not Set
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-muted-foreground flex-wrap">
                 {profile?.username && (
@@ -123,47 +131,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             {/* Sign out */}
             <div className="flex justify-center sm:justify-end w-full sm:w-auto shrink-0">
-              <SignoutButton
-                className="flex items-center justify-center gap-2 h-8 px-4 rounded-lg text-xs font-medium text-destructive/80 hover:text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/15 transition-colors"
-              />
+              <SignoutButton className="flex items-center justify-center gap-2 h-8 px-4 rounded-lg text-xs font-medium text-destructive/80 hover:text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/15 transition-colors" />
             </div>
           </div>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 pt-4 border-t border-border/50">
-          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-accent/30">
-            <div className="p-1.5 sm:p-2 rounded-md bg-primary/10 text-primary shrink-0">
-              <Building2 className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-bold leading-none">
-                {workspacesCount}
-              </p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Workspaces
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-accent/30">
-            <div className="p-1.5 sm:p-2 rounded-md bg-indigo-500/10 text-indigo-500 shrink-0">
-              <Inbox className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-bold leading-none">
-                {invitationsCount}
-              </p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Invites
-              </p>
-            </div>
-          </div>
-
+        <div className="gap-2 sm:gap-4 mt-4 pt-4 border-t border-border/50">
           <div className="flex flex-col justify-center p-2 sm:p-3 rounded-lg bg-accent/30 space-y-1.5">
             <div className="flex items-center justify-between text-[10px] sm:text-xs font-medium">
               <span className="flex items-center gap-1 text-muted-foreground">
-                <Sparkles className="w-3 h-3 text-amber-500" /> Profile
+                <UserIcon className="w-3 h-3 text-amber-500" /> Profile
               </span>
               <span className="font-bold text-primary">
                 {completionPercent}%

@@ -10,6 +10,7 @@ export type PageLoaderType =
   | "members"
   | "settings"
   | "docs"
+  | "documents"
   | "activity"
   | "analytics"
   | "calendar"
@@ -397,6 +398,7 @@ export const Loader: React.FC<LoaderProps> = ({
       case "settings":
         return <SettingsSkeleton />;
       case "docs":
+      case "documents":
         return <DocsSkeleton />;
       case "activity":
         return <ActivitySkeleton />;

@@ -17,6 +17,7 @@ interface WorkspaceMemberCardProps {
 
 const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
   const roleStr = (member.role || "member").toLowerCase();
+  const user = member.user || {};
 
   const getRoleStyle = (role: string) => {
     if (role === "owner" || role === "admin")
@@ -32,16 +33,19 @@ const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
     return <User className="w-3 h-3 mr-1 text-slate-500" />;
   };
 
-  const displayName =
-    member.full_name ||
-    member.user?.username ||
-    member.user?.email?.split("@")[0] ||
-    "Workspace Member";
+  const fullName =
+    user.full_name ||
+    (user.first_name || user.last_name
+      ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
+      : member.full_name || null);
 
-  const username = member.user?.username ? `@${member.user.username}` : "";
+  const hasName = Boolean(fullName);
+
+  const primaryTitle = hasName ? fullName : user.username ? `@${user.username}` : user.email;
+  const secondaryTitle = hasName ? (user.username ? `@${user.username}` : user.email) : user.email;
 
   return (
-    <div className="group relative bg-card hover:bg-gradient-to-b hover:from-card hover:to-accent/20 border border-border/60 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between">
+    <div className="group relative bg-card border border-border rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between">
       {/* Top Action Dropdown */}
       <div className="absolute top-3.5 right-3.5 z-10">
         <DropdownMenu>
@@ -54,7 +58,7 @@ const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl border-border/60">
+          <DropdownMenuContent align="end" className="rounded-xl border-border">
             <DropdownMenuItem className="text-xs cursor-pointer">
               <Mail className="w-3.5 h-3.5 mr-2" /> Email Member
             </DropdownMenuItem>
@@ -65,24 +69,26 @@ const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
       <div className="flex flex-col items-center text-center">
         {/* Avatar with Ring */}
         <div className="relative mb-3.5">
-          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 ring-4 ring-background border border-border group-hover:ring-primary/20 transition-all duration-300">
-            <AvatarImage src={member?.user?.avatar} className="object-cover" />
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border border-border group-hover:border-primary/40 transition-all duration-300">
+            <AvatarImage src={user.avatar} className="object-cover" />
             <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
-              {displayName[0]?.toUpperCase()}
+              {(primaryTitle?.[0] === "@" ? primaryTitle?.[1] : primaryTitle?.[0])?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
-          {/* Active status indicator dot */}
           <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-background rounded-full"></span>
         </div>
 
-        {/* Identity Info */}
+        {/* Identity Info: Name above Username if present, or Username if no name */}
         <div className="space-y-0.5 mb-3 w-full">
-          <h3 className="font-bold text-base text-foreground truncate px-2" title={displayName}>
-            {displayName}
+          <h3
+            className="font-bold text-base text-foreground truncate px-2"
+            title={primaryTitle}
+          >
+            {primaryTitle}
           </h3>
-          {username && (
+          {secondaryTitle && (
             <p className="text-xs text-muted-foreground font-medium truncate">
-              {username}
+              {secondaryTitle}
             </p>
           )}
         </div>
@@ -91,7 +97,7 @@ const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
         <Badge
           variant="outline"
           className={`mb-4 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider rounded-full border ${getRoleStyle(
-            roleStr,
+            roleStr
           )}`}
         >
           {roleIcon(roleStr)}
@@ -100,16 +106,16 @@ const WorkspaceMemberCard = ({ member }: WorkspaceMemberCardProps) => {
       </div>
 
       {/* Footer Meta Info */}
-      <div className="w-full pt-3.5 border-t border-border/50 flex flex-col gap-1.5 text-xs text-muted-foreground">
+      <div className="w-full pt-3.5 border-t border-border flex flex-col gap-1.5 text-xs text-muted-foreground">
         <div className="flex items-center justify-center gap-1.5 text-muted-foreground/90">
           <Mail className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate max-w-[190px]" title={member.user?.email}>
-            {member.user?.email}
+          <span className="truncate max-w-[190px]" title={user.email}>
+            {user.email}
           </span>
         </div>
         <div className="flex items-center justify-center gap-1.5 text-muted-foreground/75 text-[11px]">
           <CalendarDays className="w-3.5 h-3.5 shrink-0" />
-          <span>Joined {formatDate(member?.joined_at)}</span>
+          <span>Joined {formatDate(member?.joined_at || member?.created_at)}</span>
         </div>
       </div>
     </div>

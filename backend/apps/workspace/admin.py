@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Workspace, WorkspaceChannel, WorkspaceMember, WorkspaceInvitation, Project, ProjectMember, Task, Comment
+from .models.document import WorkspaceDocument
 
 # workspaces
 admin.site.register(Workspace)
@@ -15,4 +16,5 @@ admin.site.register(ProjectMember)
 admin.site.register(Task)
 admin.site.register(Comment)
 
-# Register your models here.
+# documents
+admin.site.register(WorkspaceDocument)

@@ -60,7 +60,6 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             'description',
             'owner',
             "logo",
-            'visibility',
             'created_at',
             'is_owner',
             'user_role',
@@ -94,7 +93,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
 class CreateWorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workspace
-        fields = ['id', 'name', 'description', 'visibility']
+        fields = ['id', 'name', 'description']
         read_only_fields = ['id']
 
 

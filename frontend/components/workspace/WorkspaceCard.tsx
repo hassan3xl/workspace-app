@@ -12,26 +12,22 @@ import {
 import Link from "next/link";
 
 const WorkspaceCard = ({ workspace }: { workspace: any }) => {
-  const isOwner = workspace.user_role === "owner";
-
   return (
-    <div className="group bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/50 transition-all duration-300 relative flex flex-col justify-between">
+    <div className="bg-card border border-border rounded-2xl p-5 relative flex flex-col justify-between shadow-xs">
       <div className="flex items-start gap-4">
-        {/* Logo with Status Indicator */}
+        {/* Logo */}
         <div className="relative">
-          <Avatar className="w-14 h-14 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform">
+          <Avatar className="w-14 h-14 rounded-xl border border-border shadow-xs">
             <AvatarImage src={workspace.logo} alt={workspace.name} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
-              {workspace.name[0]}
+              {workspace.name?.[0]}
             </AvatarFallback>
           </Avatar>
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 overflow-hidden">
-            <h3 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
-              {workspace.name}
-            </h3>
+            <h3 className="font-bold text-lg truncate">{workspace.name}</h3>
           </div>
           <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
             {workspace.description || "No description provided"}
@@ -46,40 +42,12 @@ const WorkspaceCard = ({ workspace }: { workspace: any }) => {
             <span className="capitalize">{workspace.visibility}</span>
           </div>
         </div>
-
-        {/* Action Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 -mr-2 text-muted-foreground hover:text-foreground"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/workspace/${workspace.id}/settings`}
-                className="cursor-pointer"
-              >
-                <Settings className="w-4 h-4 mr-2" /> Settings
-              </Link>
-            </DropdownMenuItem>
-            {!isOwner && (
-              <DropdownMenuItem className="text-destructive">
-                <LogOut className="w-4 h-4 mr-2" /> Leave Workspace
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       <div className="mt-6 flex gap-2">
         <Button
           asChild
-          className="flex-1 shadow-sm"
+          className="flex-1 shadow-xs"
           variant="default"
           size="sm"
         >

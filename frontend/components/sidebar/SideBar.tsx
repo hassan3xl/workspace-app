@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/SidebarContext";
 import HomeCard from "./cards/HomeCard";
-import MessageCard from "../messages/MessageCard";
 import UserCard from "./cards/UserCard";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,31 +29,23 @@ export function Sidebar() {
             "fixed inset-y-0 left-0 mt-13 z-50 h-[94vh] flex flex-col bg-background/95 backdrop-blur border-r border-border transition-all duration-300 ease-in-out shadow-2xl md:shadow-none",
             // Width Logic: Mobile (Full) vs Desktop (Slim)
             isOpen ? "w-[280px] translate-x-0" : "w-[280px] -translate-x-full",
-            "md:translate-x-0 md:w-[72px]",
+            "md:translate-x-0 md:w-[72px]"
           )}
         >
-          {/* --- TOP SECTION (Navigation) --- */}
+          {/* --- TOP SECTION (Navigation & User Profile) --- */}
           <div className="flex flex-col mt-4 items-center gap-3 py-2 px-2">
             <HomeCard />
-            <WorkspaceCard />
-            {/* <MessageCard /> */}
-
-            <Separator className="h-[2px] w-10 bg-accent rounded-full mx-auto" />
-          </div>
-
-          {/* --- MIDDLE SECTION (Scrollable Servers) --- */}
-          <div className="flex-1 w-full overflow-hidden hover:overflow-y-auto custom-scrollbar  py-2 space-y-2">
-            <SidebarWorkspaceCard />
-          </div>
-
-          {/* --- BOTTOM SECTION (Actions & User) --- */}
-          <div className="flex flex-col items-center gap-3 pb-4 pt-2 px-2 bg-background/50">
-            <Separator className="h-[2px] w-10 bg-accent rounded-full mx-auto" />
-
-            {/* User Card */}
-            <div className="mt-2 w-full">
+            <div className="w-full flex justify-center">
               <UserCard />
             </div>
+            <WorkspaceCard />
+
+            <Separator className="h-[2px] w-10 bg-accent rounded-full mx-auto mt-1" />
+          </div>
+
+          {/* --- MIDDLE SECTION (Scrollable Workspaces) --- */}
+          <div className="flex-1 w-full overflow-hidden hover:overflow-y-auto custom-scrollbar py-2 space-y-2">
+            <SidebarWorkspaceCard />
           </div>
         </aside>
       </>

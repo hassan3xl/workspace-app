@@ -125,7 +125,7 @@ export const ProfileWorkspacesTab: React.FC<ProfileWorkspacesTabProps> = ({
               {workspaces.map((ws: any) => (
                 <div
                   key={ws.id}
-                  className="p-5 rounded-xl border border-border bg-card/70 hover:border-emerald-500/50 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-xl border border-border bg-card flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -141,7 +141,7 @@ export const ProfileWorkspacesTab: React.FC<ProfileWorkspacesTabProps> = ({
                         </div>
                       </div>
                       <Badge variant="outline" className="text-[10px] uppercase font-medium">
-                        {ws.visibility || "Private"}
+                        Invite Only
                       </Badge>
                     </div>
 
@@ -150,7 +150,7 @@ export const ProfileWorkspacesTab: React.FC<ProfileWorkspacesTabProps> = ({
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+                  <div className="pt-3 border-t border-border flex items-center justify-between">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Users className="w-3.5 h-3.5" /> {ws.members_count || ws.member_count || 1} Members
                     </span>
