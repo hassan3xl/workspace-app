@@ -94,7 +94,9 @@ const WorkspaceDocsPage = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadDescription, setUploadDescription] = useState("");
-  const [uploadVisibility, setUploadVisibility] = useState<"public" | "private">("public");
+  const [uploadVisibility, setUploadVisibility] = useState<
+    "public" | "private"
+  >("public");
   const [isDragging, setIsDragging] = useState(false);
 
   // Delete confirmation state
@@ -229,48 +231,51 @@ const WorkspaceDocsPage = () => {
             className="rounded-xl gap-2 text-xs shadow-xs"
             onClick={() => setIsUploadModalOpen(true)}
           >
-            <FilePlus className="w-4 h-4" /> Upload Document
+            <FilePlus className="w-4 h-4" />
+            <p className="hidden md:block">Upload Document</p>
           </Button>
         }
       />
 
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search documents..."
-            className="pl-10 bg-card border-border rounded-xl text-xs"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <Input
+          placeholder="Search documents..."
+          leftIcon={<Search className="w-4 h-4" />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          containerClassName="flex-1 w-full md:max-w-lg"
+        />
 
-        <div className="flex items-center gap-2">
-          <select
+        <div className="flex items-center justify-between gap-2">
+          <Input
+            variant="select"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Types</option>
-            <option value="pdf">PDF</option>
-            <option value="doc">Documents</option>
-            <option value="spreadsheet">Spreadsheets</option>
-            <option value="image">Images</option>
-            <option value="presentation">Presentations</option>
-            <option value="archive">Archives</option>
-            <option value="other">Other</option>
-          </select>
+            options={[
+              { label: "All Types", value: "all" },
+              { label: "PDF", value: "pdf" },
+              { label: "Documents", value: "doc" },
+              { label: "Spreadsheets", value: "spreadsheet" },
+              { label: "Images", value: "image" },
+              { label: "Presentations", value: "presentation" },
+              { label: "Archives", value: "archive" },
+              { label: "Other", value: "other" },
+            ]}
+            containerClassName="w-full"
+          />
 
-          <select
+          <Input
+            variant="select"
             value={filterVisibility}
             onChange={(e) => setFilterVisibility(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Access</option>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
+            options={[
+              { label: "All Access", value: "all" },
+              { label: "Public", value: "public" },
+              { label: "Private", value: "private" },
+            ]}
+            containerClassName="w-full"
+          />
         </div>
       </div>
 
@@ -290,15 +295,17 @@ const WorkspaceDocsPage = () => {
               ? "Try adjusting your search or filters."
               : "Upload your first document to start building your workspace knowledge base."}
           </p>
-          {!searchQuery && filterType === "all" && filterVisibility === "all" && (
-            <Button
-              size="sm"
-              className="rounded-xl gap-2 text-xs mt-2"
-              onClick={() => setIsUploadModalOpen(true)}
-            >
-              <Upload className="w-4 h-4" /> Upload Document
-            </Button>
-          )}
+          {!searchQuery &&
+            filterType === "all" &&
+            filterVisibility === "all" && (
+              <Button
+                size="sm"
+                className="rounded-xl gap-2 text-xs mt-2"
+                onClick={() => setIsUploadModalOpen(true)}
+              >
+                <Upload className="w-4 h-4" /> Upload Document
+              </Button>
+            )}
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
@@ -332,9 +339,13 @@ const WorkspaceDocsPage = () => {
                         }`}
                       >
                         {doc.visibility === "private" ? (
-                          <><Lock className="w-2.5 h-2.5 mr-0.5" /> Private</>
+                          <>
+                            <Lock className="w-2.5 h-2.5 mr-0.5" /> Private
+                          </>
                         ) : (
-                          <><Eye className="w-2.5 h-2.5 mr-0.5" /> Public</>
+                          <>
+                            <Eye className="w-2.5 h-2.5 mr-0.5" /> Public
+                          </>
                         )}
                       </Badge>
                     </div>
@@ -429,13 +440,25 @@ const WorkspaceDocsPage = () => {
                 <div className="w-12 h-12 mx-auto bg-emerald-500/10 rounded-xl flex items-center justify-center">
                   {FILE_TYPE_ICONS[
                     (() => {
-                      const ext = uploadFile.name.split(".").pop()?.toLowerCase() || "";
+                      const ext =
+                        uploadFile.name.split(".").pop()?.toLowerCase() || "";
                       const map: Record<string, string> = {
-                        pdf: "pdf", doc: "doc", docx: "doc", txt: "doc",
-                        xls: "spreadsheet", xlsx: "spreadsheet", csv: "spreadsheet",
-                        png: "image", jpg: "image", jpeg: "image", gif: "image", webp: "image",
-                        ppt: "presentation", pptx: "presentation",
-                        zip: "archive", rar: "archive",
+                        pdf: "pdf",
+                        doc: "doc",
+                        docx: "doc",
+                        txt: "doc",
+                        xls: "spreadsheet",
+                        xlsx: "spreadsheet",
+                        csv: "spreadsheet",
+                        png: "image",
+                        jpg: "image",
+                        jpeg: "image",
+                        gif: "image",
+                        webp: "image",
+                        ppt: "presentation",
+                        pptx: "presentation",
+                        zip: "archive",
+                        rar: "archive",
                       };
                       return map[ext] || "other";
                     })()
@@ -467,7 +490,8 @@ const WorkspaceDocsPage = () => {
                   Drag & drop a file here
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  or click to browse — PDF, DOCX, images, spreadsheets up to 25MB
+                  or click to browse — PDF, DOCX, images, spreadsheets up to
+                  25MB
                 </p>
               </div>
             )}
@@ -482,7 +506,9 @@ const WorkspaceDocsPage = () => {
 
           {/* Title */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">Title</label>
+            <label className="text-xs font-semibold text-foreground">
+              Title
+            </label>
             <Input
               value={uploadTitle}
               onChange={(e) => setUploadTitle(e.target.value)}
@@ -493,7 +519,9 @@ const WorkspaceDocsPage = () => {
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">Description (optional)</label>
+            <label className="text-xs font-semibold text-foreground">
+              Description (optional)
+            </label>
             <Input
               value={uploadDescription}
               onChange={(e) => setUploadDescription(e.target.value)}
@@ -504,7 +532,9 @@ const WorkspaceDocsPage = () => {
 
           {/* Visibility */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-foreground">Access Level</label>
+            <label className="text-xs font-semibold text-foreground">
+              Access Level
+            </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
@@ -515,7 +545,9 @@ const WorkspaceDocsPage = () => {
                     : "bg-card border-border"
                 }`}
               >
-                <Globe className={`w-4 h-4 mt-0.5 shrink-0 ${uploadVisibility === "public" ? "text-primary" : "text-muted-foreground"}`} />
+                <Globe
+                  className={`w-4 h-4 mt-0.5 shrink-0 ${uploadVisibility === "public" ? "text-primary" : "text-muted-foreground"}`}
+                />
                 <div>
                   <p className="text-xs font-bold text-foreground">Public</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -533,7 +565,9 @@ const WorkspaceDocsPage = () => {
                     : "bg-card border-border"
                 }`}
               >
-                <Lock className={`w-4 h-4 mt-0.5 shrink-0 ${uploadVisibility === "private" ? "text-primary" : "text-muted-foreground"}`} />
+                <Lock
+                  className={`w-4 h-4 mt-0.5 shrink-0 ${uploadVisibility === "private" ? "text-primary" : "text-muted-foreground"}`}
+                />
                 <div>
                   <p className="text-xs font-bold text-foreground">Private</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -571,11 +605,17 @@ const WorkspaceDocsPage = () => {
           <DialogHeader>
             <DialogTitle className="text-lg">Delete Document</DialogTitle>
             <DialogDescription className="text-sm">
-              Are you sure you want to delete <strong>{deleteTarget?.title}</strong>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <strong>{deleteTarget?.title}</strong>? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} className="text-xs">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              className="text-xs"
+            >
               Cancel
             </Button>
             <Button

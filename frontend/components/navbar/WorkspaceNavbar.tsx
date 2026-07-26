@@ -25,7 +25,7 @@ export function WorkspaceNavbar({ workspace }: WorkspaceNavbarProps) {
               aria-label="Toggle mobile menu"
               variant={"ghost"}
             >
-              <MenuIcon />
+              <MenuIcon size={20} />
             </Button>
             <Link href="/" className="rounded-md md:ml-22 p-2">
               <Image

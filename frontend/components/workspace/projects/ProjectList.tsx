@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Plus,
   Search,
-  Archive,
   FolderPlus,
-  SlidersHorizontal,
   Folder,
   CheckCircle2,
   Clock,
@@ -29,18 +26,24 @@ const ProjectList = () => {
   const { workspaceId, isAdminOrOwner } = useWorkspace();
   const { data: projects, isLoading } = useGetProjects(workspaceId);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   if (isLoading) return <Loader page="projects" />;
 
   // Filter Logic (Client side)
-  const filteredProjects = projects?.filter((p) =>
-    p.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredProjects = projects?.filter((p) => {
+    const matchesSearch = p.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || p.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const totalCount = projects?.length || 0;
   const completedCount =
     projects?.filter(
-      (p) => p.item_count > 0 && p.completed_count === p.item_count,
+      (p) => p.status === "completed" || (p.item_count > 0 && p.completed_count === p.item_count),
     ).length || 0;
   const activeCount = totalCount - completedCount;
 
@@ -52,6 +55,17 @@ const ProjectList = () => {
         subtitle="Oversee, organize, and manage all initiatives within your workspace."
         showBackButton
         onBack={() => router.push(`/workspace/${workspaceId}`)}
+        actions={
+          isAdminOrOwner && (
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="gap-2 rounded-xl text-xs px-5"
+            >
+              <Plus size={20} />{" "}
+              <span className="hidden md:block">New Project</span>
+            </Button>
+          )
+        }
         stats={[
           {
             title: "Active Projects",
@@ -109,55 +123,30 @@ const ProjectList = () => {
         // --- Content State ---
         <div className="space-y-6">
           {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center py-2">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center py-2">
             {/* Search */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search projects..."
-                className="pl-9 bg-card border-border/60 rounded-xl text-xs"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+            <Input
+              placeholder="Search projects..."
+              leftIcon={<Search className="w-4 h-4" />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              containerClassName="w-full sm:w-80"
+            />
 
-            {/* Actions */}
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="flex-1 sm:flex-none rounded-xl text-xs border-border/60"
-              >
-                <Link href={`/workspace/${workspaceId}/projects/archives/`}>
-                  <Archive className="w-3.5 h-3.5 mr-1.5" />
-                  Archives
-                </Link>
-              </Button>
-              {isAdminOrOwner && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="flex-1 sm:flex-none rounded-xl text-xs border-border/60"
-                  >
-                    <Link href={`/workspace/${workspaceId}/projects/settings/`}>
-                      <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" />
-                      Settings
-                    </Link>
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex-1 sm:flex-none rounded-xl text-xs gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    New Project
-                  </Button>
-                </>
-              )}
-            </div>
+            {/* Status Filter */}
+            <Input
+              variant="select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                { label: "All Statuses", value: "all" },
+                { label: "Active", value: "active" },
+                { label: "Planning", value: "planning" },
+                { label: "On Hold", value: "on_hold" },
+                { label: "Completed", value: "completed" },
+              ]}
+              containerClassName="w-full sm:w-44"
+            />
           </div>
 
           {/* Grid */}
@@ -173,8 +162,7 @@ const ProjectList = () => {
 
           {filteredProjects?.length === 0 && (
             <div className="text-center py-12 text-muted-foreground text-sm">
-              No projects found matching "
-              <span className="font-medium text-foreground">{searchTerm}</span>"
+              No projects found matching your search and filter criteria.
             </div>
           )}
         </div>

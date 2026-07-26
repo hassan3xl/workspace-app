@@ -30,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FormInput } from "@/components/input/formInput";
+import { FormInput } from "@/components/ui/input";
 import Loader from "@/components/Loader";
 import Header from "@/components/Header";
 import { cn, formatDate } from "@/lib/utils";
@@ -238,53 +238,42 @@ const ProjectSettingsPage = () => {
                 label="Project Title"
                 placeholder="Enter project title"
                 required
-                field="input"
               />
 
               <FormInput
                 register={register}
                 name="description"
+                variant="textarea"
                 label="Project Description"
                 placeholder="Brief summary of what this project entails..."
-                field="textarea"
                 rows={4}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                {/* Status Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">
-                    Project Status
-                  </label>
-                  <select
-                    {...register("status")}
-                    className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors cursor-pointer"
-                  >
-                    <option value="planning">Planning</option>
-                    <option value="active">Active</option>
-                    <option value="on_hold">On Hold</option>
-                    <option value="completed">Completed</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
+                <FormInput
+                  register={register}
+                  name="status"
+                  variant="select"
+                  label="Project Status"
+                  options={[
+                    { label: "Planning", value: "planning" },
+                    { label: "Active", value: "active" },
+                    { label: "On Hold", value: "on_hold" },
+                    { label: "Completed", value: "completed" },
+                    { label: "Archived", value: "archived" },
+                  ]}
+                />
 
-                {/* Visibility Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">
-                    Visibility
-                  </label>
-                  <select
-                    {...register("visibility")}
-                    className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors cursor-pointer"
-                  >
-                    <option value="private">
-                      Private (Workspace Team Only)
-                    </option>
-                    <option value="public">
-                      Public (Open Workspace Access)
-                    </option>
-                  </select>
-                </div>
+                <FormInput
+                  register={register}
+                  name="visibility"
+                  variant="select"
+                  label="Visibility"
+                  options={[
+                    { label: "Private (Workspace Team Only)", value: "private" },
+                    { label: "Public (Open Workspace Access)", value: "public" },
+                  ]}
+                />
               </div>
 
               {/* Created Info */}

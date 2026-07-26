@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import { ProfilePType } from "@/lib/types/user.types";
 import {
   useAcceptWorkspaceInvitation,
@@ -221,23 +222,14 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
         </CardHeader>
         <CardContent className="space-y-2 sm:space-y-3">
           {toggleItems.map((item, index) => (
-            <div
+            <Input
               key={index}
-              className="flex items-start sm:items-center justify-between p-3 rounded-lg border border-border bg-card gap-3"
-            >
-              <div className="space-y-0.5 min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium">{item.label}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={(e) => item.onChange(e.target.checked)}
-                className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0 mt-0.5 sm:mt-0"
-              />
-            </div>
+              variant="switch"
+              label={item.label}
+              helperText={item.description}
+              value={item.checked}
+              onChange={item.onChange}
+            />
           ))}
 
           <div className="flex justify-end pt-2">

@@ -31,11 +31,6 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
     router.push(`/workspace/${workspaceId}/projects/${project.id}`);
   };
 
-  const handleSettings = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    router.push(`/workspace/${workspaceId}/projects/${project.id}/settings/`);
-  };
-
   const handleRequest = (e: React.MouseEvent) => {
     e.stopPropagation();
     // apiService.requestCollaboration(project.id)
@@ -93,12 +88,6 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
             {project.title}
           </h3>
         </div>
-        {isAdminOrOwner && (
-          <Settings2
-            className="text-muted-foreground hover:text-primary"
-            onClick={handleSettings}
-          />
-        )}
       </div>
 
       {/* --- Description --- */}
@@ -133,7 +122,7 @@ const ProjectCard = ({ project, workspaceId }: ProjectCardProps) => {
             const membersList = project.members?.length
               ? project.members
               : project.collaborators || [];
-            
+
             return (
               <>
                 {membersList.slice(0, 3).map((collab: any, i: number) => {

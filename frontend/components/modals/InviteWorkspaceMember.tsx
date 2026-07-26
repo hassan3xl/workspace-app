@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import BaseModal from "./BaseModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
-import { FormInput } from "../input/formInput";
+import { FormInput } from "@/components/ui/input";
 import { useInviteUser } from "@/lib/hooks/workspace.hook";
 import { Shield, CalendarIcon } from "lucide-react";
 import {
@@ -20,11 +19,7 @@ import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 interface InviteWorkspaceMemberProps {
@@ -51,16 +46,14 @@ const InviteWorkspaceMember: React.FC<InviteWorkspaceMemberProps> = ({
     control,
     handleSubmit,
     reset,
-    formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      role: "member", // Default role
+      role: "member",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      // Format date to ISO string if it exists, otherwise undefined (backend handles default 7 days)
       const formattedData = {
         ...data,
         expires_at: data.expires_at ? data.expires_at.toISOString() : null,
@@ -75,7 +68,6 @@ const InviteWorkspaceMember: React.FC<InviteWorkspaceMemberProps> = ({
       reset();
       onClose();
     } catch (error) {
-      // Error is handled by the mutation hook or global handler usually
       console.error("Failed to invite:", error);
     }
   };
@@ -92,7 +84,6 @@ const InviteWorkspaceMember: React.FC<InviteWorkspaceMemberProps> = ({
             name="email"
             placeholder="user@example.com"
             required
-            errors={errors}
             type="email"
             label="User Email"
           />
@@ -101,17 +92,15 @@ const InviteWorkspaceMember: React.FC<InviteWorkspaceMemberProps> = ({
           <FormInput
             name="role"
             label="Role"
-            field="select"
+            variant="select"
             register={register}
-            icon={Shield}
-            errors={errors} // Fixed prop name from 'error' to 'errors'
+            leftIcon={<Shield className="w-4 h-4" />}
             placeholder="Select role"
             options={[
               { value: "admin", label: "Admin" },
               { value: "member", label: "Member" },
               { value: "guest", label: "Guest" },
             ]}
-            validation={{ required: "Role is required" }}
           />
 
           {/* Expiration Date Picker (Optional) */}
@@ -146,7 +135,7 @@ const InviteWorkspaceMember: React.FC<InviteWorkspaceMemberProps> = ({
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={
-                        (date) => date < new Date() // Disable past dates
+                        (date) => date < new Date()
                       }
                     />
                   </PopoverContent>

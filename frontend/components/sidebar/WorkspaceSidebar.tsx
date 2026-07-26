@@ -71,11 +71,6 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
           href: `/workspace/${workspaceId}/calendar`,
           icon: <Calendar size={20} />,
         },
-        {
-          label: "Analytics & Insights",
-          href: `/workspace/${workspaceId}/analytics`,
-          icon: <BarChart3 size={20} />,
-        },
       ],
     },
     {
@@ -216,8 +211,13 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
 
                         return (
                           <Tooltip key={item.href}>
-                            <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-                            <TooltipContent side="right" className="font-semibold">
+                            <TooltipTrigger asChild>
+                              {linkContent}
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="right"
+                              className="font-semibold"
+                            >
                               {item.label}
                             </TooltipContent>
                           </Tooltip>

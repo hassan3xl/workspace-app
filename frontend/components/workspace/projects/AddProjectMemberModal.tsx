@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { InputField } from "@/components/input/InputField";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAddProjectCollab } from "@/lib/hooks/project.hook";
 import { useGetWorkspaceMembers } from "@/lib/hooks/workspace.hook";
@@ -104,15 +104,12 @@ const AddProjectMemberModal: React.FC<AddProjectMemberModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* 1. Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <InputField
-              placeholder="Search by email or username..."
-              className="pl-9 h-10 text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <Input
+            placeholder="Search by email or username..."
+            leftIcon={<Search className="w-4 h-4" />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
 
           {/* 2. Members List (Scrollable) */}
           <div className="overflow-y-auto min-h-[160px] max-h-[220px] border border-border/60 rounded-xl divide-y divide-border/40 bg-muted/20">

@@ -16,7 +16,7 @@ import {
   Search,
 } from "lucide-react";
 import BaseModal from "@/components/modals/BaseModal";
-import { FormInput } from "@/components/input/formInput";
+import { FormInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -110,53 +110,36 @@ const AddTaskModal = ({
 
           {/* Priority and Due Date Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Priority Select */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Flag className="w-3.5 h-3.5 text-muted-foreground" /> Priority
-              </label>
-              <div className="relative">
-                <select
-                  {...register("priority", { required: true })}
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none cursor-pointer hover:bg-accent/50 transition-colors"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Select Level
-                  </option>
-                  <option value="high">High Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="low">Low Priority</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50 pointer-events-none" />
-              </div>
-              {errors.priority && (
-                <p className="text-[0.8rem] font-medium text-destructive">
-                  Required
-                </p>
-              )}
-            </div>
+            <FormInput
+              register={register}
+              name="priority"
+              variant="select"
+              label="Priority"
+              leftIcon={<Flag className="w-3.5 h-3.5" />}
+              placeholder="Select Level"
+              options={[
+                { label: "High Priority", value: "high" },
+                { label: "Medium Priority", value: "medium" },
+                { label: "Low Priority", value: "low" },
+              ]}
+              required
+            />
 
-            {/* Date Input */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> Due
-                Date
-              </label>
-              <input
-                type="date"
-                {...register("due_date")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 uppercase tracking-wider text-muted-foreground focus:text-foreground"
-              />
-            </div>
+            <FormInput
+              register={register}
+              name="due_date"
+              variant="date"
+              label="Due Date"
+              leftIcon={<Calendar className="w-3.5 h-3.5" />}
+            />
           </div>
 
           {/* Description */}
           <FormInput
             register={register}
             name="description"
+            variant="textarea"
             label="Description"
-            field="textarea"
             placeholder="Add notes..."
             required
             rows={3}

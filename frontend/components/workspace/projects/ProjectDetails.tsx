@@ -392,26 +392,26 @@ const ProjectDetails = () => {
 
           {/* Filter Controls */}
           <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search tasks..."
-                value={taskSearch}
-                onChange={(e) => setTaskSearch(e.target.value)}
-                className="pl-9 bg-card border-border/60 rounded-xl text-xs"
-              />
-            </div>
+            <Input
+              placeholder="Search tasks..."
+              leftIcon={<Search className="w-4 h-4" />}
+              value={taskSearch}
+              onChange={(e) => setTaskSearch(e.target.value)}
+              containerClassName="w-full sm:w-64"
+            />
 
-            <select
+            <Input
+              variant="select"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-auto px-3 py-2 bg-card border border-border/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary font-medium"
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+              options={[
+                { label: "All Statuses", value: "all" },
+                { label: "Pending", value: "pending" },
+                { label: "In Progress", value: "in_progress" },
+                { label: "Completed", value: "completed" },
+              ]}
+              containerClassName="w-full sm:w-36"
+            />
           </div>
         </div>
 

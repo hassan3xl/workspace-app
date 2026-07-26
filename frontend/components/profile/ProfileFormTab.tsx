@@ -5,9 +5,7 @@ import { Camera, Loader2, User, Mail, Phone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Input, FormInput } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -86,8 +84,7 @@ export const ProfileFormTab: React.FC<ProfileFormTabProps> = ({ profile }) => {
       <Card className="border-border w-full min-w-0">
         <CardHeader className="pb-2 sm:pb-4">
           <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
-            <User className="w-4 h-4 text-primary shrink-0" /> Personal
-            Information
+            <User className="w-4 h-4 text-primary shrink-0" /> Personal Information
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             Update your photo and profile details
@@ -163,104 +160,55 @@ export const ProfileFormTab: React.FC<ProfileFormTabProps> = ({ profile }) => {
           {/* Form Fields */}
           <form onSubmit={handleSubmit(onUpdateProfile)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="first_name" className="text-xs font-medium">
-                    First Name
-                  </Label>
-                  {!profile?.first_name && (
-                    <span className="text-[10px] text-amber-600 font-semibold uppercase">Required for display</span>
-                  )}
-                </div>
-                <Input
-                  id="first_name"
-                  {...register("first_name")}
-                  placeholder="e.g. Hassan"
-                  className={`bg-background h-9 text-sm ${
-                    !profile?.first_name ? "border-amber-500 ring-1 ring-amber-500/30" : ""
-                  }`}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="last_name" className="text-xs font-medium">
-                    Last Name
-                  </Label>
-                  {!profile?.last_name && (
-                    <span className="text-[10px] text-amber-600 font-semibold uppercase">Required for display</span>
-                  )}
-                </div>
-                <Input
-                  id="last_name"
-                  {...register("last_name")}
-                  placeholder="e.g. Saidu"
-                  className={`bg-background h-9 text-sm ${
-                    !profile?.last_name ? "border-amber-500 ring-1 ring-amber-500/30" : ""
-                  }`}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="username" className="text-xs font-medium">
-                  Username
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-muted-foreground text-sm">
-                    @
-                  </span>
-                  <Input
-                    id="username"
-                    {...register("username")}
-                    placeholder="hassan_saidu"
-                    className="pl-7 bg-background h-9 text-sm"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone_number" className="text-xs font-medium">
-                  Phone
-                </Label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-                  <Input
-                    id="phone_number"
-                    {...register("phone_number")}
-                    placeholder="+234 800 000 0000"
-                    className="pl-9 bg-background h-9 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="bio" className="text-xs font-medium">
-                Bio
-              </Label>
-              <Textarea
-                id="bio"
-                {...register("bio")}
-                className="resize-none min-h-[80px] sm:min-h-[100px] bg-background text-sm"
-                placeholder="Share a brief summary about yourself..."
+              <FormInput
+                register={register}
+                name="first_name"
+                label="First Name"
+                placeholder="e.g. Hassan"
+              />
+              <FormInput
+                register={register}
+                name="last_name"
+                label="Last Name"
+                placeholder="e.g. Saidu"
               />
             </div>
 
-            {/* Read-Only Email */}
-            <div className="pt-1">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Account Email
-              </Label>
-              <div className="relative mt-1">
-                <Mail className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-                <Input
-                  disabled
-                  value={profile?.user?.email || ""}
-                  className="pl-9 bg-muted/40 text-muted-foreground border-transparent cursor-not-allowed h-9 text-sm"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <FormInput
+                register={register}
+                name="username"
+                label="Username"
+                placeholder="hassan_saidu"
+                leftIcon={<span className="text-xs font-bold text-muted-foreground">@</span>}
+                required
+              />
+              <FormInput
+                register={register}
+                name="phone_number"
+                label="Phone"
+                placeholder="+234 800 000 0000"
+                leftIcon={<Phone className="w-4 h-4" />}
+              />
             </div>
+
+            <FormInput
+              register={register}
+              name="bio"
+              label="Bio"
+              variant="textarea"
+              rows={3}
+              placeholder="Share a brief summary about yourself..."
+            />
+
+            {/* Read-Only Email */}
+            <Input
+              disabled
+              label="Account Email"
+              leftIcon={<Mail className="w-4 h-4" />}
+              value={profile?.user?.email || ""}
+              helperText="Your account email address cannot be modified."
+            />
 
             <div className="flex justify-end pt-3 border-t border-border/50">
               <Button

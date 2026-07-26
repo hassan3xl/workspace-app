@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { TaskType } from "@/lib/types/project.types";
 import { useUpdateTask } from "@/lib/hooks/project.hook";
 import BaseModal from "@/components/modals/BaseModal";
-import { FormInput } from "@/components/input/formInput";
+import { FormInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface EditTaskModalProps {
@@ -89,37 +89,33 @@ const EditTaskModal = ({
         <FormInput
           register={register}
           name="description"
+          variant="textarea"
           label="Description"
-          required
+          rows={3}
         />
 
         {/* Priority */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Priority</label>
-          <select
-            {...register("priority", { required: true })}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="">Select priority</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-
-          {errors.priority && (
-            <p className="text-xs text-red-500">Priority is required</p>
-          )}
-        </div>
+        <FormInput
+          register={register}
+          name="priority"
+          variant="select"
+          label="Priority"
+          placeholder="Select priority"
+          options={[
+            { label: "High", value: "high" },
+            { label: "Medium", value: "medium" },
+            { label: "Low", value: "low" },
+          ]}
+          required
+        />
 
         {/* Due Date */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Due Date (optional)</label>
-          <input
-            type="date"
-            {...register("due_date")}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <FormInput
+          register={register}
+          name="due_date"
+          variant="date"
+          label="Due Date (optional)"
+        />
 
         {/* Actions */}
         <div className="flex justify-end space-x-2 pt-4">

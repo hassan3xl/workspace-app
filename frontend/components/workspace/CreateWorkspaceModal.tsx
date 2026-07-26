@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import BaseModal from "../modals/BaseModal";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { FormInput } from "../input/formInput";
+import { FormInput } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   useCreateWorkspace,

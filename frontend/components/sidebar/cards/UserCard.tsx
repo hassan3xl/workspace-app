@@ -2,10 +2,9 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -22,27 +21,32 @@ export default function UserCard() {
     closeSidebar();
   };
 
+  const displayName =
+    user?.full_name ||
+    user?.username ||
+    "User";
+
   const content = (
     <button
       onClick={handleProfile}
       className={cn(
         "flex items-center gap-3 w-full transition-all group",
-        // Desktop: Simple Avatar
         "md:justify-center md:p-0",
-        // Mobile: Card style
         "p-2 rounded-xl hover:bg-accent bg-accent/30",
       )}
     >
       <div className="relative w-10 h-10 shrink-0">
-        <div className="w-full h-full rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
-          <Image
-            src={user?.avatar || "/userIcon.png"}
-            alt="user"
-            fill
-            className="object-cover rounded-xl"
+        <Avatar className="w-10 h-10 border-2 border-transparent group-hover:border-primary transition-all">
+          <AvatarImage
+            src={user?.avatar || ""}
+            alt={displayName}
+            className="object-cover"
           />
-        </div>
-        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></div>
+          <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+            {displayName[0]?.toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full"></div>
       </div>
 
       <div
@@ -52,10 +56,10 @@ export default function UserCard() {
         )}
       >
         <p className="text-md font-semibold truncate w-32 text-left">
-          {user?.username}
+          {displayName}
         </p>
         <p className="text-xs text-muted-foreground truncate w-32 text-left">
-          {user?.user.email}
+          {user?.user?.email || ""}
         </p>
       </div>
     </button>

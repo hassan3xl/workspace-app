@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export const ProfilePreferencesTab: React.FC = () => {
@@ -48,34 +49,25 @@ export const ProfilePreferencesTab: React.FC = () => {
         <CardHeader className="pb-2 sm:pb-4">
           <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
             <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />{" "}
-            Notifications
+            Notifications & Preferences
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Control what emails you receive.
+            Manage your email alerts and application preferences.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 sm:space-y-3">
+        <CardContent className="space-y-3">
           {toggleItems.map((item, index) => (
-            <div
+            <Input
               key={index}
-              className="flex items-start sm:items-center justify-between p-3 rounded-lg border border-border bg-card gap-3"
-            >
-              <div className="space-y-0.5 min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium">{item.label}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={(e) => item.onChange(e.target.checked)}
-                className="h-4 w-4 rounded border-border accent-[hsl(var(--primary))] cursor-pointer shrink-0 mt-0.5 sm:mt-0"
-              />
-            </div>
+              variant="switch"
+              label={item.label}
+              helperText={item.description}
+              value={item.checked}
+              onChange={item.onChange}
+            />
           ))}
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-3 border-t border-border/40">
             <Button
               size="sm"
               onClick={savePreferences}

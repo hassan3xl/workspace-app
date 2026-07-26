@@ -27,7 +27,7 @@ import Loader from "@/components/Loader";
 import { formatDate } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { FormInput } from "@/components/input/formInput";
+import { Input, FormInput } from "@/components/ui/input";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import InviteWorkspaceMember from "@/components/modals/InviteWorkspaceMember";
 import Header from "@/components/Header";
@@ -427,9 +427,10 @@ const WorkspaceSettingsPage = () => {
             <FormInput
               register={register}
               name="description"
+              variant="textarea"
               label="Workspace Description"
               placeholder="Brief description of the workspace"
-              type="text"
+              rows={3}
             />
 
             <div className="flex justify-end pt-2">
@@ -464,34 +465,30 @@ const WorkspaceSettingsPage = () => {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search members..."
-                  value={memberSearch}
-                  onChange={(e) => setMemberSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-background border border-border/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <Button
-                size="sm"
-                onClick={() => setOpenInviteModal(true)}
-                className="rounded-xl gap-2 text-xs shrink-0"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                Invite Member
-              </Button>
+              <Input
+                placeholder="Search members..."
+                leftIcon={<Search className="w-4 h-4" />}
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+                containerClassName="flex-1 sm:w-64"
+              />
             </div>
           </div>
 
           <div className="divide-y divide-border/60">
             {filteredMembers.map((member: any) => {
               const u = member.user || {};
-              const fn = u.full_name || (u.first_name || u.last_name ? `${u.first_name || ""} ${u.last_name || ""}`.trim() : null);
+              const fn =
+                u.full_name ||
+                (u.first_name || u.last_name
+                  ? `${u.first_name || ""} ${u.last_name || ""}`.trim()
+                  : null);
               const pName = fn || (u.username ? `@${u.username}` : u.email);
-              const sName = fn ? (u.username ? `@${u.username} • ${u.email}` : u.email) : u.email;
+              const sName = fn
+                ? u.username
+                  ? `@${u.username} • ${u.email}`
+                  : u.email
+                : u.email;
 
               return (
                 <div
@@ -502,7 +499,10 @@ const WorkspaceSettingsPage = () => {
                     <Avatar className="w-10 h-10 rounded-full border border-border shrink-0">
                       <AvatarImage src={u.avatar} />
                       <AvatarFallback className="font-bold bg-primary/10 text-primary">
-                        {(pName?.[0] === "@" ? pName?.[1] : pName?.[0])?.toUpperCase() || "U"}
+                        {(pName?.[0] === "@"
+                          ? pName?.[1]
+                          : pName?.[0]
+                        )?.toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
 
@@ -521,53 +521,53 @@ const WorkspaceSettingsPage = () => {
                     </div>
                   </div>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                  <Badge
-                    variant="outline"
-                    className={`capitalize text-xs font-semibold px-2.5 py-1 ${
-                      member.role === "owner"
-                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        : member.role === "admin"
-                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                          : "bg-muted text-muted-foreground border-border/60"
-                    }`}
-                  >
-                    {member.role}
-                  </Badge>
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <Badge
+                      variant="outline"
+                      className={`capitalize text-xs font-semibold px-2.5 py-1 ${
+                        member.role === "owner"
+                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          : member.role === "admin"
+                            ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                            : "bg-muted text-muted-foreground border-border/60"
+                      }`}
+                    >
+                      {member.role}
+                    </Badge>
 
-                  {member.role !== "owner" && isAdminOrOwner && (
-                    <div className="flex items-center gap-2">
-                      <select
-                        className="px-3 py-1.5 bg-background border border-border/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary font-medium"
-                        defaultValue={member.role}
-                        onChange={(e) =>
-                          handleRoleChange(member.user.id, e.target.value)
-                        }
-                      >
-                        <option value="member">Member</option>
-                        <option value="guest">Guest</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                    {member.role !== "owner" && isAdminOrOwner && (
+                      <div className="flex items-center gap-2">
+                        <select
+                          className="px-3 py-1.5 bg-background border border-border/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                          defaultValue={member.role}
+                          onChange={(e) =>
+                            handleRoleChange(member.user.id, e.target.value)
+                          }
+                        >
+                          <option value="member">Member</option>
+                          <option value="guest">Guest</option>
+                          <option value="admin">Admin</option>
+                        </select>
 
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() =>
-                          setMemberToRemove({
-                            id: member.user.id,
-                            email: member.user.email,
-                          })
-                        }
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0 rounded-lg"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            setMemberToRemove({
+                              id: member.user.id,
+                              email: member.user.email,
+                            })
+                          }
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0 rounded-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
           </div>
         </div>
       )}

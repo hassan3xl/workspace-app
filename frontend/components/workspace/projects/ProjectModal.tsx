@@ -15,7 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FormInput } from "@/components/input/formInput";
+import { FormInput } from "@/components/ui/input";
 import { ProjectType } from "@/lib/types/project.types";
 import {
   useAddproject,
@@ -212,45 +212,44 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               label="Project Title"
               placeholder="e.g. Website Redesign"
               required
-              field="input"
             />
 
             <FormInput
               register={register}
               name="description"
+              variant="textarea"
               label="Project Description"
               placeholder="Brief summary of project goals..."
-              field="textarea"
               rows={3}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {mode === "edit" && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Status</label>
-                  <select
-                    {...register("status")}
-                    className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors cursor-pointer"
-                  >
-                    <option value="planning">Planning</option>
-                    <option value="active">Active</option>
-                    <option value="on_hold">On Hold</option>
-                    <option value="completed">Completed</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
+                <FormInput
+                  register={register}
+                  name="status"
+                  variant="select"
+                  label="Status"
+                  options={[
+                    { label: "Planning", value: "planning" },
+                    { label: "Active", value: "active" },
+                    { label: "On Hold", value: "on_hold" },
+                    { label: "Completed", value: "completed" },
+                    { label: "Archived", value: "archived" },
+                  ]}
+                />
               )}
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Visibility</label>
-                <select
-                  {...register("visibility")}
-                  className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors cursor-pointer"
-                >
-                  <option value="public">Public (All workspace members)</option>
-                  <option value="private">Private (Project members only)</option>
-                </select>
-              </div>
+              <FormInput
+                register={register}
+                name="visibility"
+                variant="select"
+                label="Visibility"
+                options={[
+                  { label: "Public (All workspace members)", value: "public" },
+                  { label: "Private (Project members only)", value: "private" },
+                ]}
+              />
             </div>
 
             <DialogFooter className="pt-4 border-t border-border/40 flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">

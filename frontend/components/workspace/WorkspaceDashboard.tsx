@@ -200,55 +200,57 @@ const WorkspaceDashboard = () => {
           )}
 
           {/* 2. ACTIVE PROJECTS */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2">
-                <LayoutDashboard className="w-5 h-5 text-primary" />
-                Active Projects
-              </h2>
-              <Link
-                href={`/workspace/${workspaceId}/projects`}
-                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-              >
-                View All <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+          <div className=" rounded-2xl overflow-hidden">
+            <div className="space-y-4">
+              <div className="bg-card p-4 rounded-t-2xl flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2">
+                  <LayoutDashboard className="w-5 h-5 text-primary" />
+                  Active Projects
+                </h2>
+                <Link
+                  href={`/workspace/${workspaceId}/projects`}
+                  className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                >
+                  View All <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
 
-            {/* Recent projects grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {dashboard?.active_projects?.map((project: ProjectType) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  workspaceId={workspaceId}
-                />
-              ))}
+              {/* Recent projects grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {dashboard?.active_projects?.map((project: ProjectType) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    workspaceId={workspaceId}
+                  />
+                ))}
 
-              {(!dashboard?.active_projects ||
-                dashboard.active_projects.length === 0) && (
-                <div className="col-span-full p-8 border border-dashed border-border rounded-2xl text-center bg-muted space-y-3">
-                  <Folder className="w-10 h-10 mx-auto text-muted-foreground" />
-                  <div>
-                    <p className="font-semibold text-sm">
-                      No active projects yet
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Create your first project to organize tasks and
-                      collaborate with team members.
-                    </p>
+                {(!dashboard?.active_projects ||
+                  dashboard.active_projects.length === 0) && (
+                  <div className="col-span-full p-8 border border-dashed border-border rounded-2xl text-center bg-muted space-y-3">
+                    <Folder className="w-10 h-10 mx-auto text-muted-foreground" />
+                    <div>
+                      <p className="font-semibold text-sm">
+                        No active projects yet
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Create your first project to organize tasks and
+                        collaborate with team members.
+                      </p>
+                    </div>
+                    {isAdminOrOwner && (
+                      <Button
+                        onClick={() => setIsAddProjectModalOpen(true)}
+                        size="sm"
+                        className="rounded-xl gap-2 text-xs"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Create Project
+                      </Button>
+                    )}
                   </div>
-                  {isAdminOrOwner && (
-                    <Button
-                      onClick={() => setIsAddProjectModalOpen(true)}
-                      size="sm"
-                      className="rounded-xl gap-2 text-xs"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Create Project
-                    </Button>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
