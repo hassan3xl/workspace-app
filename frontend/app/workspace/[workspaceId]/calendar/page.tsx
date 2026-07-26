@@ -536,7 +536,7 @@ const WorkspaceCalendarPage = () => {
               Agenda & Scheduled Milestones
             </h3>
             <p className="text-xs text-muted-foreground">
-              schedule of workspace project deliverables.
+              Chronological schedule of workspace project deliverables.
             </p>
           </div>
 
